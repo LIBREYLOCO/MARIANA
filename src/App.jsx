@@ -8,13 +8,27 @@ const UNLOCK_DATE   = new Date('2026-03-05T00:00:00');
 const SECRET_CODE   = 'LOCOPORTI';   // opens the portal (goes to intro)
 const BYPASS_CODE   = 'LIBREPORTI';  // skips quiz, jumps directly to reveal
 
+const WRONG_MSGS = [
+  'Amor, ese no es... pero sé que lo sabes 💛',
+  'Bebé, no seas impaciente, pronto llegará tu momento ✨',
+  'Amor, te amo demasiado para dejarte pasar sin el código correcto 🔐',
+  'Bebé, espérate... lo mejor llega a su tiempo 🌙',
+  'Amor, cada intento me recuerda cuánto te quiero 💫',
+  'Bebé, ese tampoco es... pero tu paciencia te lo va a premiar 🎁',
+  'Amor, sigue intentando — yo aquí te espero con todo mi corazón ♥',
+  'Bebé, no te rindas... muy pronto sabrás todo 🌟',
+  'Amor, te amo tanto que hasta el candado lo siente 🔓💛',
+  'Bebé, el código existe — y cuando lo encuentres, vas a entender todo ✦',
+];
+
 function LockedScreen({ onUnlock, onBypass }) {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
   const [visible, setVisible] = useState(false);
   const [showInput, setShowInput] = useState(false);
   const [code, setCode] = useState('');
   const [shake, setShake] = useState(false);
-  const [wrongMsg, setWrongMsg] = useState(false);
+  const [wrongVisible, setWrongVisible] = useState(false);
+  const [wrongIdx, setWrongIdx] = useState(0);
   const inputRef = useRef(null);
 
   function getTimeLeft() {
@@ -47,9 +61,10 @@ function LockedScreen({ onUnlock, onBypass }) {
       onUnlock();
     } else {
       setShake(true);
-      setWrongMsg(true);
+      setWrongVisible(true);
+      setWrongIdx(i => (i + 1) % WRONG_MSGS.length);
       setCode('');
-      setTimeout(() => { setShake(false); setWrongMsg(false); }, 1800);
+      setTimeout(() => { setShake(false); setWrongVisible(false); }, 2200);
     }
   }
 
@@ -191,10 +206,11 @@ function LockedScreen({ onUnlock, onBypass }) {
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >→</button>
             </div>
-            {wrongMsg && (
-              <p style={{ marginTop: 10, fontSize: 11, fontFamily: 'system-ui',
-                color: '#c4687a', letterSpacing: '0.2em', fontWeight: 700 }}>
-                Código incorrecto ✗
+            {wrongVisible && (
+              <p style={{ marginTop: 10, fontSize: 12, fontFamily: 'system-ui',
+                color: '#c4687a', letterSpacing: '0.12em', fontWeight: 600,
+                fontStyle: 'italic', transition: 'opacity 0.3s ease' }}>
+                {WRONG_MSGS[wrongIdx]}
               </p>
             )}
           </form>

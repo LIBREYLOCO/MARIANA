@@ -266,24 +266,100 @@ function QuantumCard({ visible }) {
   );
 }
 
-// ── Itinerary Drawer ──
+// ── Itinerary Accordion ──
 function ItineraryDrawer({ items }) {
   const [open, setOpen] = useState(false);
+
+  const timeline = (
+    <div style={{ padding: '28px 0 8px', position: 'relative' }}>
+      {/* Vertical line */}
+      <div style={{
+        position: 'absolute', left: 19, top: 28, bottom: 8, width: 1,
+        background: 'linear-gradient(to bottom,rgba(212,168,83,0.4),rgba(196,104,122,0.2),rgba(212,168,83,0.1))',
+      }} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {items.map((item, i) => {
+          const Icon = item.icon;
+          const isLast = i === items.length - 1;
+          return (
+            <div key={i} style={{ display: 'flex', gap: 16, position: 'relative',
+              paddingBottom: isLast ? 0 : 20 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                background: item.bg, border: `1.5px solid ${item.color}60`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative', zIndex: 2, boxShadow: `0 0 10px ${item.color}20`,
+              }}>
+                <Icon style={{ width: 15, height: 15, color: item.color }} />
+              </div>
+              <div style={{
+                flex: 1, paddingTop: 7,
+                borderBottom: isLast ? 'none' : '1px solid rgba(212,168,83,0.05)',
+                paddingBottom: isLast ? 0 : 16,
+              }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
+                  <span style={{
+                    fontSize: 9, fontFamily: 'system-ui', fontWeight: 700,
+                    letterSpacing: '0.2em', textTransform: 'uppercase',
+                    color: item.color, background: item.bg,
+                    padding: '2px 9px', borderRadius: 100, border: `1px solid ${item.color}30`,
+                  }}>{item.date}</span>
+                  {item.tag && (
+                    <span style={{
+                      fontSize: 8, fontFamily: 'system-ui', fontWeight: 800,
+                      letterSpacing: '0.2em', textTransform: 'uppercase', color: '#07000e',
+                      background: 'linear-gradient(135deg,#d4a853,#c4687a)',
+                      padding: '2px 9px', borderRadius: 100,
+                    }}>{item.tag}</span>
+                  )}
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#f5e6c8', marginBottom: 2 }}>{item.label}</p>
+                <p style={{ fontSize: 11, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.5)', marginBottom: 1, lineHeight: 1.5 }}>{item.detail}</p>
+                <p style={{ fontSize: 10, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.3)', lineHeight: 1.4 }}>{item.sub}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {/* Close button */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+        <button
+          onClick={() => setOpen(false)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(212,168,83,0.08)', border: '1px solid rgba(212,168,83,0.25)',
+            borderRadius: 100, padding: '10px 24px', cursor: 'pointer',
+            color: '#d4a853', fontSize: 12, fontFamily: 'system-ui',
+            fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase',
+            transition: 'background 0.2s ease',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,168,83,0.15)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(212,168,83,0.08)'}
+        >
+          Cerrar itinerario ×
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <>
+    <div style={{
+      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,168,83,0.18)',
+      borderRadius: 20, overflow: 'hidden',
+      transition: 'border-color 0.3s ease',
+    }}>
       {/* Trigger button */}
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => setOpen(v => !v)}
         style={{
-          gridColumn: '1 / -1',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           width: '100%', cursor: 'pointer',
-          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,168,83,0.18)',
-          borderRadius: 20, padding: '20px 28px',
-          transition: 'background 0.2s ease, border-color 0.2s ease',
+          background: 'transparent', border: 'none',
+          padding: '20px 28px',
+          transition: 'background 0.2s ease',
         }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,168,83,0.06)'; e.currentTarget.style.borderColor = 'rgba(212,168,83,0.35)'; }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(212,168,83,0.18)'; }}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,168,83,0.05)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
@@ -307,116 +383,27 @@ function ItineraryDrawer({ items }) {
           width: 36, height: 36, borderRadius: '50%',
           background: 'linear-gradient(135deg,#d4a853,#c4687a)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          transform: open ? 'rotate(90deg)' : 'rotate(0)',
+          transition: 'transform 0.35s ease',
         }}>
           <span style={{ color: '#07000e', fontSize: 18, fontWeight: 900, lineHeight: 1 }}>→</span>
         </div>
       </button>
 
-      {/* Overlay */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 100,
-            background: 'rgba(7,0,14,0.7)', backdropFilter: 'blur(6px)',
-            animation: 'fade-in 0.3s ease',
-          }}
-        />
-      )}
-
-      {/* Drawer panel */}
+      {/* Expandable section — pushes content down */}
       <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 101,
-        width: 'min(480px, 100vw)',
-        background: 'linear-gradient(180deg,#0d001f 0%,#07000e 100%)',
-        borderLeft: '1px solid rgba(212,168,83,0.2)',
-        boxShadow: '-40px 0 80px rgba(0,0,0,0.6)',
-        transform: open ? 'translateX(0)' : 'translateX(100%)',
-        transition: 'transform 0.45s cubic-bezier(0.16,1,0.3,1)',
-        display: 'flex', flexDirection: 'column',
-        overflowY: 'auto',
+        maxHeight: open ? 2000 : 0,
+        overflow: 'hidden',
+        transition: 'max-height 0.55s cubic-bezier(0.16,1,0.3,1)',
       }}>
-        {/* Drawer header */}
         <div style={{
-          padding: '28px 28px 20px',
-          borderBottom: '1px solid rgba(212,168,83,0.1)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          position: 'sticky', top: 0,
-          background: 'linear-gradient(180deg,#0d001f 80%,transparent)',
-          zIndex: 2,
+          borderTop: '1px solid rgba(212,168,83,0.1)',
+          padding: '0 28px 28px',
         }}>
-          <div>
-            <p style={{ fontSize: 9, fontFamily: 'system-ui', fontWeight: 700,
-              letterSpacing: '0.35em', textTransform: 'uppercase', color: '#d4a853', marginBottom: 4 }}>
-              Itinerario
-            </p>
-            <h3 style={{ fontSize: 20, fontWeight: 900, fontStyle: 'italic', color: '#f5e6c8' }}>
-              Denver · Week Long Retreat
-            </h3>
-          </div>
-          <button
-            onClick={() => setOpen(false)}
-            style={{
-              width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(212,168,83,0.3)',
-              background: 'rgba(212,168,83,0.08)', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#d4a853', fontSize: 18, fontWeight: 700, flexShrink: 0,
-            }}
-          >×</button>
-        </div>
-
-        {/* Timeline */}
-        <div style={{ padding: '24px 28px 40px', position: 'relative', flex: 1 }}>
-          <div style={{
-            position: 'absolute', left: 47, top: 24, bottom: 40, width: 1,
-            background: 'linear-gradient(to bottom,rgba(212,168,83,0.4),rgba(196,104,122,0.2),rgba(212,168,83,0.1))',
-          }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {items.map((item, i) => {
-              const Icon = item.icon;
-              const isLast = i === items.length - 1;
-              return (
-                <div key={i} style={{ display: 'flex', gap: 18, paddingBottom: isLast ? 0 : 22, position: 'relative' }}>
-                  <div style={{
-                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                    background: item.bg, border: `1.5px solid ${item.color}60`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    position: 'relative', zIndex: 2, boxShadow: `0 0 10px ${item.color}20`,
-                  }}>
-                    <Icon style={{ width: 15, height: 15, color: item.color }} />
-                  </div>
-                  <div style={{
-                    flex: 1, paddingTop: 7,
-                    borderBottom: isLast ? 'none' : '1px solid rgba(212,168,83,0.05)',
-                    paddingBottom: isLast ? 0 : 18,
-                  }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
-                      <span style={{
-                        fontSize: 9, fontFamily: 'system-ui', fontWeight: 700,
-                        letterSpacing: '0.2em', textTransform: 'uppercase',
-                        color: item.color, background: item.bg,
-                        padding: '2px 9px', borderRadius: 100, border: `1px solid ${item.color}30`,
-                      }}>{item.date}</span>
-                      {item.tag && (
-                        <span style={{
-                          fontSize: 8, fontFamily: 'system-ui', fontWeight: 800,
-                          letterSpacing: '0.2em', textTransform: 'uppercase', color: '#07000e',
-                          background: 'linear-gradient(135deg,#d4a853,#c4687a)',
-                          padding: '2px 9px', borderRadius: 100,
-                        }}>{item.tag}</span>
-                      )}
-                    </div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: '#f5e6c8', marginBottom: 2 }}>{item.label}</p>
-                    <p style={{ fontSize: 11, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.5)', marginBottom: 1, lineHeight: 1.5 }}>{item.detail}</p>
-                    <p style={{ fontSize: 10, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.3)', lineHeight: 1.4 }}>{item.sub}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          {timeline}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -619,130 +606,79 @@ export default function RevealScreen() {
             </div>
           </div>
 
-          {/* ── Return to Madrid photo card ── */}
-          <div style={{
-            background:'rgba(255,255,255,0.02)', border:'1px solid rgba(212,168,83,0.18)',
-            borderRadius:28, overflow:'hidden',
-            opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(40px)',
-            transition:'all 1s ease 0.7s',
-          }}>
-            <div style={{ position:'relative', height:180, overflow:'hidden' }}>
-              <img src="/photos/6b6c39ca-2004-4484-ac7e-7ccbe6681e77.jpg" alt=""
-                style={{ position:'absolute', inset:0, width:'100%', height:'100%',
-                  objectFit:'cover', objectPosition:'center', filter:'brightness(0.75)' }} />
-              <div style={{ position:'absolute', inset:0,
-                background:'linear-gradient(to bottom,transparent 30%,rgba(7,0,14,0.85) 100%)' }} />
-              <div style={{
-                position:'absolute', top:14, left:14,
-                display:'inline-flex', alignItems:'center', gap:7,
-                padding:'5px 14px', borderRadius:100,
-                background:'rgba(7,0,14,0.5)', border:'1px solid rgba(212,168,83,0.35)',
-                backdropFilter:'blur(8px)',
-              }}>
-                <Plane style={{ width:12, height:12, color:'#d4a853' }} />
-                <span style={{ fontSize:9, fontFamily:'system-ui', fontWeight:800,
-                  letterSpacing:'0.3em', textTransform:'uppercase', color:'#d4a853' }}>
-                  Lun 13 · DEN → MAD
-                </span>
-              </div>
-            </div>
-            <div style={{ padding:'22px 26px' }}>
-              <p style={{ fontSize:10, fontFamily:'system-ui', fontWeight:700,
-                letterSpacing:'0.3em', textTransform:'uppercase', color:'#d4a853', marginBottom:10 }}>
-                El Regreso
-              </p>
-              <p style={{ fontSize:'clamp(0.95rem,2.5vw,1.05rem)', fontWeight:300,
-                fontStyle:'italic', color:'rgba(245,230,200,0.85)', lineHeight:1.7 }}>
-                "Regreso a Madrid juntos, después de un viaje inolvidable y llenos de energía."
-              </p>
-            </div>
-          </div>
-
           {/* ── Breckenridge showcase ── */}
           <div style={{
             gridColumn:'1 / -1',
             borderRadius:28, overflow:'hidden', position:'relative',
             opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(40px)',
             transition:'all 1s ease 0.85s', boxShadow:'0 40px 100px rgba(0,0,0,0.5)',
+            background:'linear-gradient(170deg,#0a1628 0%,#0d2240 40%,#1a3a5c 100%)',
           }}>
-            <div style={{
-              background:'linear-gradient(170deg,#0a1628 0%,#0d2240 25%,#1a3a5c 50%,#2d5a8e 70%,#3d7ab5 85%,#6ba3d6 100%)',
-              padding:'56px 40px 0', position:'relative', overflow:'hidden',
-            }}>
-              {[...Array(18)].map((_,i) => (
-                <div key={i} style={{
-                  position:'absolute', borderRadius:'50%',
-                  width:i%3===0?3:2, height:i%3===0?3:2, background:'white',
-                  top:`${5+(i*17)%45}%`, left:`${(i*13+7)%95}%`,
-                  opacity:0.4+(i%4)*0.15,
-                  animation:`heartbeat ${2+(i%3)}s ease ${i*0.3}s infinite`,
-                }} />
-              ))}
-              <div style={{
-                position:'absolute', top:0, left:0, right:0, height:'60%',
-                background:'radial-gradient(ellipse at 30% 20%,rgba(110,231,183,0.12) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(147,197,253,0.10) 0%,transparent 55%)',
-                pointerEvents:'none',
+            {/* Stars */}
+            {[...Array(18)].map((_,i) => (
+              <div key={i} style={{
+                position:'absolute', borderRadius:'50%',
+                width:i%3===0?3:2, height:i%3===0?3:2, background:'white',
+                top:`${5+(i*17)%40}%`, left:`${(i*13+7)%95}%`,
+                opacity:0.4+(i%4)*0.15,
+                animation:`heartbeat ${2+(i%3)}s ease ${i*0.3}s infinite`,
+                zIndex:1,
               }} />
-              <div style={{ position:'relative', zIndex:2, marginBottom:32,
-                display:'flex', flexWrap:'wrap', gap:32, alignItems:'flex-start' }}>
-                {/* Text side */}
-                <div style={{ flex:'1 1 280px' }}>
-                  <div style={{ display:'inline-flex', alignItems:'center', gap:8,
-                    padding:'6px 18px', borderRadius:100,
-                    background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.15)',
-                    marginBottom:20 }}>
-                    <span style={{ fontSize:9, fontFamily:'system-ui', fontWeight:800,
-                      letterSpacing:'0.35em', textTransform:'uppercase', color:'#93c5fd' }}>
-                      ✦  Post-Retiro · Aventura de Montaña  ✦
-                    </span>
-                  </div>
-                  <h3 style={{ fontSize:'clamp(2rem,6vw,3.5rem)', fontWeight:900, fontStyle:'italic',
-                    color:'#ffffff', lineHeight:1, marginBottom:10, textShadow:'0 2px 20px rgba(0,0,0,0.4)' }}>
-                    Breckenridge,
-                  </h3>
-                  <h3 style={{ fontSize:'clamp(2rem,6vw,3.5rem)', fontWeight:900, fontStyle:'italic',
-                    color:'#ffffff', lineHeight:1, marginBottom:20, textShadow:'0 2px 20px rgba(0,0,0,0.4)' }}>
-                    Colorado
-                  </h3>
-                  <p style={{ fontSize:'clamp(0.9rem,2vw,1.05rem)', fontWeight:300, color:'rgba(255,255,255,0.65)', maxWidth:440, lineHeight:1.7 }}>
-                    Después de siete días transformando tu mente en el retiro, la montaña te espera
-                    para integrar, respirar y celebrar lo que eres ahora.
-                  </p>
-                </div>
-                {/* Hotel photo */}
-                <div style={{ flex:'1 1 260px', borderRadius:16, overflow:'hidden',
-                  boxShadow:'0 20px 60px rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.12)' }}>
-                  <img src="/one-ski-hill.webp" alt="One Ski Hill Place"
-                    style={{ width:'100%', height:220, objectFit:'cover', display:'block' }} />
-                  <div style={{ background:'rgba(10,22,40,0.9)', padding:'10px 16px' }}>
-                    <p style={{ fontSize:11, fontFamily:'system-ui', fontWeight:700, color:'#93c5fd',
-                      letterSpacing:'0.2em', textTransform:'uppercase' }}>One Ski Hill Place</p>
-                    <p style={{ fontSize:10, fontFamily:'system-ui', color:'rgba(255,255,255,0.4)',
-                      letterSpacing:'0.1em' }}>Breckenridge, Colorado · Abr 10–13</p>
-                  </div>
-                </div>
-              </div>
-              <svg viewBox="0 0 960 220" xmlns="http://www.w3.org/2000/svg"
-                style={{ display:'block', width:'100%', marginBottom:-2, position:'relative', zIndex:2 }}>
-                <polygon points="0,220 120,60 240,220"   fill="#1a3a5c" opacity="0.7" />
-                <polygon points="100,220 260,30 420,220"  fill="#1e4470" opacity="0.8" />
-                <polygon points="300,220 480,10 660,220"  fill="#234f80" />
-                <polygon points="480,10 450,55 510,55"    fill="white"   opacity="0.9" />
-                <polygon points="260,30 237,68 283,68"    fill="white"   opacity="0.75" />
-                <polygon points="500,220 650,70 800,220"  fill="#0d2240" />
-                <polygon points="640,220 760,90 880,220"  fill="#091828" />
-                <polygon points="750,220 870,100 990,220" fill="#060f1a" />
-                <polygon points="650,70 630,100 670,100"  fill="white"   opacity="0.7" />
-                <polygon points="760,90 743,118 777,118"  fill="white"   opacity="0.65" />
-                <rect x="0" y="195" width="960" height="25" fill="#e8f4fd" opacity="0.9" rx="4" />
-                <ellipse cx="200" cy="195" rx="140" ry="18" fill="white" opacity="0.4" />
-                <ellipse cx="600" cy="195" rx="180" ry="20" fill="white" opacity="0.35" />
-              </svg>
-            </div>
+            ))}
+            {/* Aurora glow */}
             <div style={{
-              background:'linear-gradient(135deg,#060f1a,#0a1628)',
+              position:'absolute', top:0, left:0, right:0, height:'50%',
+              background:'radial-gradient(ellipse at 30% 20%,rgba(110,231,183,0.1) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(147,197,253,0.08) 0%,transparent 55%)',
+              pointerEvents:'none', zIndex:1,
+            }} />
+
+            {/* Text block — above photo */}
+            <div style={{ position:'relative', zIndex:2, padding:'48px 40px 32px', textAlign:'center' }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8,
+                padding:'6px 18px', borderRadius:100,
+                background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.15)',
+                marginBottom:20 }}>
+                <span style={{ fontSize:9, fontFamily:'system-ui', fontWeight:800,
+                  letterSpacing:'0.35em', textTransform:'uppercase', color:'#93c5fd' }}>
+                  ✦  Post-Retiro · Aventura de Montaña  ✦
+                </span>
+              </div>
+              <h3 style={{ fontSize:'clamp(2.2rem,7vw,4rem)', fontWeight:900, fontStyle:'italic',
+                color:'#ffffff', lineHeight:1.05, marginBottom:16, textShadow:'0 2px 20px rgba(0,0,0,0.4)' }}>
+                Breckenridge, Colorado
+              </h3>
+              <p style={{ fontSize:'clamp(0.9rem,2vw,1.05rem)', fontWeight:300,
+                color:'rgba(255,255,255,0.65)', maxWidth:520, margin:'0 auto', lineHeight:1.8 }}>
+                Después de siete días transformando tu mente en el retiro, la montaña te espera
+                para integrar, respirar y celebrar lo que eres ahora.
+              </p>
+            </div>
+
+            {/* Hotel photo — full width, large */}
+            <div style={{ position:'relative', zIndex:2, margin:'0 28px 0' }}>
+              <img src="/one-ski-hill.webp" alt="One Ski Hill Place"
+                style={{ width:'100%', height:'clamp(220px,40vw,400px)',
+                  objectFit:'cover', display:'block', borderRadius:'16px 16px 0 0',
+                  boxShadow:'0 -20px 60px rgba(0,0,0,0.4)' }} />
+              <div style={{
+                background:'rgba(10,22,40,0.88)',
+                padding:'10px 20px', borderRadius:'0 0 16px 16px',
+                display:'flex', gap:16, alignItems:'center',
+                borderTop:'1px solid rgba(147,197,253,0.15)',
+              }}>
+                <p style={{ fontSize:12, fontFamily:'system-ui', fontWeight:700, color:'#93c5fd',
+                  letterSpacing:'0.2em', textTransform:'uppercase' }}>One Ski Hill Place</p>
+                <span style={{ color:'rgba(255,255,255,0.2)', fontSize:10 }}>·</span>
+                <p style={{ fontSize:11, fontFamily:'system-ui', color:'rgba(255,255,255,0.4)' }}>Breckenridge, Colorado · Abr 10–13</p>
+              </div>
+            </div>
+
+            {/* Info strip */}
+            <div style={{
+              position:'relative', zIndex:2,
               padding:'28px 40px', display:'flex', flexWrap:'wrap', gap:32, alignItems:'center',
-              borderTop:'1px solid rgba(147,197,253,0.15)',
+              justifyContent:'center',
+              borderTop:'1px solid rgba(147,197,253,0.1)',
             }}>
               {[
                 { emoji:'🏔️', label:'Altitud',        val:'2,926 m' },
