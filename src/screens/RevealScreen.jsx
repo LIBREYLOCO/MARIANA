@@ -6,7 +6,7 @@ const confirmations = [
   { label: "Gaylord Rockies Resort  ·  8 noches", status: "✓ Confirmado" },
   { label: "Retiro Encephalon  ·  Dr. Joe",       status: "✓ Confirmado" },
   { label: "JEEP Wrangler  ·  Renta",            status: "✓ Confirmado" },
-  { label: "One Ski Hill Place  ·  Breckenridge", status: "✓ Confirmado" },
+  { label: "One Ski Hill Place  ·  Breckenridge  ·  3 noches", status: "✓ Confirmado" },
 ];
 
 const highlights = [
@@ -430,6 +430,121 @@ export default function RevealScreen() {
                 textTransform: 'uppercase', color: 'rgba(245,230,200,0.3)', marginTop: 4 }}>
                 Tu Co-Creador
               </p>
+            </div>
+          </div>
+
+          {/* ── Breckenridge showcase ── */}
+          <div style={{
+            gridColumn: '1 / -1',
+            borderRadius: 28, overflow: 'hidden',
+            position: 'relative',
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'all 1s ease 0.85s',
+            boxShadow: '0 40px 100px rgba(0,0,0,0.5)',
+          }}>
+            {/* Sky gradient background */}
+            <div style={{
+              background: 'linear-gradient(170deg, #0a1628 0%, #0d2240 25%, #1a3a5c 50%, #2d5a8e 70%, #3d7ab5 85%, #6ba3d6 100%)',
+              padding: '56px 40px 0',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              {/* Stars */}
+              {[...Array(18)].map((_, i) => (
+                <div key={i} style={{
+                  position: 'absolute',
+                  width: i % 3 === 0 ? 3 : 2,
+                  height: i % 3 === 0 ? 3 : 2,
+                  borderRadius: '50%',
+                  background: 'white',
+                  top: `${5 + (i * 17) % 45}%`,
+                  left: `${(i * 13 + 7) % 95}%`,
+                  opacity: 0.4 + (i % 4) * 0.15,
+                  animation: `heartbeat ${2 + (i % 3)}s ease ${i * 0.3}s infinite`,
+                }} />
+              ))}
+
+              {/* Aurora effect */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: '60%',
+                background: 'radial-gradient(ellipse at 30% 20%, rgba(110,231,183,0.12) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(147,197,253,0.10) 0%, transparent 55%)',
+                pointerEvents: 'none',
+              }} />
+
+              {/* Top label */}
+              <div style={{ position: 'relative', zIndex: 2, marginBottom: 32 }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '6px 18px', borderRadius: 100,
+                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                  marginBottom: 20 }}>
+                  <span style={{ fontSize: 9, fontFamily: 'system-ui', fontWeight: 800,
+                    letterSpacing: '0.35em', textTransform: 'uppercase', color: '#93c5fd' }}>
+                    ✦  Post-Retiro · Aventura de Montaña  ✦
+                  </span>
+                </div>
+                <h3 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: 900, fontStyle: 'italic',
+                  color: '#ffffff', lineHeight: 1, marginBottom: 10, textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}>
+                  Breckenridge,
+                </h3>
+                <h3 style={{ fontSize: 'clamp(2rem, 6vw, 3.5rem)', fontWeight: 900, fontStyle: 'italic',
+                  color: '#ffffff', lineHeight: 1, marginBottom: 20, textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}>
+                  Colorado
+                </h3>
+                <p style={{ fontSize: 'clamp(0.9rem, 2vw, 1.05rem)', fontWeight: 300, color: 'rgba(255,255,255,0.65)',
+                  maxWidth: 480, lineHeight: 1.7 }}>
+                  Después de siete días transformando tu mente en el retiro, la montaña te espera
+                  para integrar, respirar y celebrar lo que eres ahora.
+                </p>
+              </div>
+
+              {/* Mountain silhouette SVG */}
+              <svg viewBox="0 0 960 220" xmlns="http://www.w3.org/2000/svg"
+                style={{ display: 'block', width: '100%', marginBottom: -2, position: 'relative', zIndex: 2 }}>
+                {/* Back mountains */}
+                <polygon points="0,220 120,60 240,220" fill="#1a3a5c" opacity="0.7" />
+                <polygon points="100,220 260,30 420,220" fill="#1e4470" opacity="0.8" />
+                <polygon points="300,220 480,10 660,220" fill="#234f80" />
+                {/* Snow caps */}
+                <polygon points="480,10 450,55 510,55" fill="white" opacity="0.9" />
+                <polygon points="260,30 237,68 283,68" fill="white" opacity="0.75" />
+                {/* Mid mountains */}
+                <polygon points="500,220 650,70 800,220" fill="#0d2240" />
+                <polygon points="640,220 760,90 880,220" fill="#091828" />
+                <polygon points="750,220 870,100 990,220" fill="#060f1a" />
+                {/* Snow caps mid */}
+                <polygon points="650,70 630,100 670,100" fill="white" opacity="0.7" />
+                <polygon points="760,90 743,118 777,118" fill="white" opacity="0.65" />
+                {/* Foreground snow */}
+                <rect x="0" y="195" width="960" height="25" fill="#e8f4fd" opacity="0.9" rx="4" />
+                <ellipse cx="200" cy="195" rx="140" ry="18" fill="white" opacity="0.4" />
+                <ellipse cx="600" cy="195" rx="180" ry="20" fill="white" opacity="0.35" />
+              </svg>
+            </div>
+
+            {/* Bottom info strip */}
+            <div style={{
+              background: 'linear-gradient(135deg, #060f1a, #0a1628)',
+              padding: '28px 40px',
+              display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'center',
+              borderTop: '1px solid rgba(147,197,253,0.15)',
+            }}>
+              {[
+                { emoji: '🏔️', label: 'Altitud', val: '2,926 m' },
+                { emoji: '🎿', label: 'Pistas de esquí', val: '187 km' },
+                { emoji: '🏨', label: 'Alojamiento', val: 'One Ski Hill Place' },
+                { emoji: '🌙', label: 'Noches', val: '3 noches  ·  Abr 10–13' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 24 }}>{item.emoji}</span>
+                  <div>
+                    <p style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+                      letterSpacing: '0.2em', textTransform: 'uppercase',
+                      color: 'rgba(147,197,253,0.5)', marginBottom: 2 }}>{item.label}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#f5e6c8' }}>{item.val}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
