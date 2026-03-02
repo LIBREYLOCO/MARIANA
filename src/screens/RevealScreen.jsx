@@ -53,12 +53,13 @@ function FlyingPhoto({ photo }) {
   const [fly, setFly] = useState(false);
   const angle = useMemo(() => Math.random() * Math.PI * 2, []);
   // Make the distance far enough to go off-screen
-  const dist = useMemo(() => window.innerWidth * 0.8 + Math.random() * (window.innerWidth * 0.5), []);
-  // Random duration between 4s and 8s for varying speeds
-  const duration = useMemo(() => 4 + Math.random() * 4, []);
-  // Random twists, spins, and scales
-  const rot = useMemo(() => (Math.random() - 0.5) * 1080, []);
-  const scale = useMemo(() => 0.6 + Math.random() * 1.2, []);
+  const dist = useMemo(() => window.innerWidth * 0.7 + Math.random() * (window.innerWidth * 0.8), []);
+  // Faster base duration, between 2.5s and 5.5s
+  const duration = useMemo(() => 2.5 + Math.random() * 3, []);
+  // More spins
+  const rot = useMemo(() => (Math.random() - 0.5) * 1440, []);
+  const scale = useMemo(() => 0.4 + Math.random() * 1.5, []);
+  const initialRot = useMemo(() => (Math.random() - 0.5) * 180, []);
 
   useEffect(() => {
     // Start animation shortly after mounting
@@ -70,12 +71,11 @@ function FlyingPhoto({ photo }) {
     <img src={`/photos/${encodeURIComponent(photo)}`} alt="" style={{
       position: 'absolute', width: 220, height: 300, objectFit: 'cover', borderRadius: 20,
       left: -110, top: -150, zIndex: 9999, pointerEvents: 'none',
-      // Start with high opacity and fade slightly as it flies away, but keep visible until offscreen
-      opacity: fly ? 0 : 1,
+      opacity: fly ? 0 : 1.2,
       transform: fly
         ? `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) rotate(${rot}deg) scale(${scale})`
-        : `translate(0px, 0px) rotate(0deg) scale(0)`,
-      transition: `transform ${duration}s cubic-bezier(0.25, 1, 0.5, 1), opacity ${duration}s ease-in`,
+        : `translate(0px, 0px) rotate(${initialRot}deg) scale(0)`,
+      transition: `transform ${duration}s cubic-bezier(0.15, 0.9, 0.3, 1), opacity ${duration}s ease-in`,
       boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
       border: '2px solid rgba(212,168,83,0.3)'
     }} />
@@ -102,21 +102,26 @@ function QuantumCard({ visible }) {
       return;
     }
 
-    // Launch one photo at a time from the queue
+    // Launch two photos at a time from the queue
     const cycle = () => {
       setFlyQueue(prevQueue => {
         let currentQueue = [...prevQueue];
-        if (currentQueue.length === 0) {
-          // Refill and reshuffle when empty
-          currentQueue = shuffle(ALL_PHOTOS);
+        if (currentQueue.length < 2) {
+          // Refill and reshuffle when low
+          currentQueue = [...currentQueue, ...shuffle(ALL_PHOTOS)];
         }
 
-        const nextPhoto = currentQueue.shift();
+        const nextPhoto1 = currentQueue.shift();
+        const nextPhoto2 = currentQueue.shift();
 
         setFlying(prev => {
-          // Keep the last 15 photos in the DOM to let them finish animating
-          const activeFlying = prev.slice(-15);
-          return [...activeFlying, { id: Math.random().toString(), photo: nextPhoto }];
+          // Keep the last 20 photos in the DOM to let them finish animating
+          const activeFlying = prev.slice(-20);
+          return [
+            ...activeFlying,
+            { id: Math.random().toString(), photo: nextPhoto1 },
+            { id: Math.random().toString(), photo: nextPhoto2 }
+          ];
         });
 
         return currentQueue;
@@ -125,7 +130,7 @@ function QuantumCard({ visible }) {
 
     // Initial launch and interval
     cycle();
-    const delay = 600 + Math.random() * 800; // Launch a photo every 0.6s to 1.4s
+    const delay = 700 + Math.random() * 600; // Launch every 0.7s to 1.3s
     const id = setInterval(cycle, delay);
     return () => clearInterval(id);
   }, [active]);
