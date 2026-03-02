@@ -562,10 +562,11 @@ export default function RevealScreen() {
             <Star style={{ width: 20, height: 20, color: '#d4a853', fill: '#d4a853',
               margin: '0 auto 16px', animation: 'heartbeat 3s ease infinite' }} />
             <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.15rem)', fontStyle: 'italic',
-              fontWeight: 300, color: 'rgba(245,230,200,0.7)', lineHeight: 1.8,
-              maxWidth: 600, margin: '0 auto' }}>
-              "A partir de hoy, no esperes a estar en Denver para ser feliz. Empieza a ser
-              la Mariana que ya estuvo allí, que ya sanó, que ya amó profundamente y sin miedo."
+              fontWeight: 300, color: 'rgba(245,230,200,0.7)', lineHeight: 1.9,
+              maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
+              "A partir de hoy, no esperes a estar en Denver para ser feliz.<br />
+              Empieza a ser la Mariana que ya estuvo allí,<br />
+              que ya sanó, que ya amó profundamente y sin miedo."
             </p>
           </div>
 
