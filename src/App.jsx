@@ -4,9 +4,10 @@ import QuizScreen from './screens/QuizScreen';
 import CollapsingScreen from './screens/CollapsingScreen';
 import RevealScreen from './screens/RevealScreen';
 
-const UNLOCK_DATE   = new Date('2026-03-05T00:00:00');
-const SECRET_CODE   = 'LOCOPORTI';   // opens the portal (goes to intro)
-const BYPASS_CODE   = 'LIBREPORTI';  // skips quiz, jumps directly to reveal
+const UNLOCK_DATE = new Date('2026-03-05T00:00:00');
+const SECRET_CODE = 'LOCOPORTI';    // early access → intro
+const BYPASS_CODE = 'LIBREPORTI';  // bypass → reveal
+const LOVU_CODE = 'LOVU INFINITO'; // public code after countdown → intro
 
 const WRONG_MSGS = [
   'Amor, ese no es... pero sé que lo sabes 💛',
@@ -21,7 +22,7 @@ const WRONG_MSGS = [
   'Bebé, el código existe — y cuando lo encuentres, vas a entender todo ✦',
 ];
 
-function LockedScreen({ onUnlock, onBypass }) {
+function LockedScreen({ onUnlock, onBypass, onLovu }) {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
   const [visible, setVisible] = useState(false);
   const [showInput, setShowInput] = useState(false);
@@ -34,8 +35,8 @@ function LockedScreen({ onUnlock, onBypass }) {
   function getTimeLeft() {
     const diff = UNLOCK_DATE - new Date();
     if (diff <= 0) return null;
-    const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     return { days, hours, minutes, seconds };
@@ -47,6 +48,11 @@ function LockedScreen({ onUnlock, onBypass }) {
     return () => clearInterval(id);
   }, []);
 
+  // Auto-show input when countdown ends
+  useEffect(() => {
+    if (timeLeft === null) setShowInput(true);
+  }, [timeLeft]);
+
   // Focus input when it appears
   useEffect(() => {
     if (showInput) setTimeout(() => inputRef.current?.focus(), 50);
@@ -57,6 +63,8 @@ function LockedScreen({ onUnlock, onBypass }) {
     const entered = code.trim().toUpperCase();
     if (entered === BYPASS_CODE) {
       onBypass();
+    } else if (entered === LOVU_CODE) {
+      onLovu();
     } else if (entered === SECRET_CODE) {
       onUnlock();
     } else {
@@ -76,21 +84,27 @@ function LockedScreen({ onUnlock, onBypass }) {
         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
         lineHeight: 1,
       }}>{String(val).padStart(2, '0')}</div>
-      <div style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+      <div style={{
+        fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
         letterSpacing: '0.25em', textTransform: 'uppercase',
-        color: 'rgba(245,230,200,0.35)', marginTop: 6 }}>{label}</div>
+        color: 'rgba(245,230,200,0.35)', marginTop: 6
+      }}>{label}</div>
     </div>
   );
 
   const sep = (
-    <div style={{ fontSize: 'clamp(1.5rem,5vw,2.5rem)', fontWeight: 900, color: 'rgba(212,168,83,0.4)',
-      alignSelf: 'flex-start', marginTop: 8 }}>:</div>
+    <div style={{
+      fontSize: 'clamp(1.5rem,5vw,2.5rem)', fontWeight: 900, color: 'rgba(212,168,83,0.4)',
+      alignSelf: 'flex-start', marginTop: 8
+    }}>:</div>
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 50%, #1a0030 0%, #07000e 70%)',
+    <div style={{
+      minHeight: '100vh', background: 'radial-gradient(ellipse at 50% 50%, #1a0030 0%, #07000e 70%)',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      color: '#f5e6c8', padding: '40px 24px', position: 'relative', overflow: 'hidden' }}>
+      color: '#f5e6c8', padding: '40px 24px', position: 'relative', overflow: 'hidden'
+    }}>
 
       {/* Shooting stars */}
       {[...Array(3)].map((_, i) => (
@@ -121,7 +135,7 @@ function LockedScreen({ onUnlock, onBypass }) {
         textAlign: 'center', maxWidth: 560, position: 'relative', zIndex: 10,
       }}>
 
-        {/* Lock icon — hover to reveal input */}
+        {/* Lock icon */}
         <div
           title="¿Tienes el código secreto?"
           onClick={() => setShowInput(v => !v)}
@@ -151,19 +165,21 @@ function LockedScreen({ onUnlock, onBypass }) {
           {showInput ? '🔓' : '🔐'}
         </div>
 
-        {/* Secret code input — slides in */}
+        {/* Code input */}
         <div style={{
           overflow: 'hidden',
-          maxHeight: showInput ? 140 : 0,
+          maxHeight: showInput ? 160 : 0,
           opacity: showInput ? 1 : 0,
           transition: 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease',
           marginBottom: showInput ? 20 : 0,
         }}>
           <form onSubmit={handleSubmit}>
-            <p style={{ fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
+            <p style={{
+              fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
               letterSpacing: '0.3em', textTransform: 'uppercase',
-              color: 'rgba(212,168,83,0.6)', marginBottom: 12 }}>
-              Código secreto
+              color: 'rgba(212,168,83,0.6)', marginBottom: 12
+            }}>
+              Código de acceso
             </p>
             <div style={{
               display: 'flex', gap: 8, justifyContent: 'center',
@@ -174,23 +190,23 @@ function LockedScreen({ onUnlock, onBypass }) {
                 type="text"
                 value={code}
                 onChange={e => setCode(e.target.value.toUpperCase())}
-                maxLength={12}
+                maxLength={16}
                 placeholder="••••••••••"
                 autoComplete="off"
                 style={{
                   background: 'rgba(255,255,255,0.05)',
-                  border: wrongMsg
+                  border: wrongVisible
                     ? '1px solid rgba(196,104,122,0.8)'
                     : '1px solid rgba(212,168,83,0.35)',
                   borderRadius: 12,
                   padding: '12px 20px',
                   color: '#f5e6c8',
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: 700,
                   fontFamily: 'system-ui',
-                  letterSpacing: '0.25em',
+                  letterSpacing: '0.15em',
                   textAlign: 'center',
-                  width: 220,
+                  width: 240,
                   outline: 'none',
                   transition: 'border-color 0.3s ease',
                 }}
@@ -202,16 +218,25 @@ function LockedScreen({ onUnlock, onBypass }) {
                 color: '#07000e', fontSize: 18, cursor: 'pointer',
                 fontWeight: 900, transition: 'opacity 0.2s ease',
               }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >→</button>
             </div>
             {wrongVisible && (
-              <p style={{ marginTop: 10, fontSize: 12, fontFamily: 'system-ui',
-                color: '#c4687a', letterSpacing: '0.12em', fontWeight: 600,
-                fontStyle: 'italic', transition: 'opacity 0.3s ease' }}>
+              <div style={{
+                marginTop: 20, position: 'relative', display: 'inline-block',
+                background: '#f5e6c8', padding: '14px 24px', borderRadius: '24px',
+                color: '#c4687a', fontSize: 16, fontWeight: 800, fontStyle: 'italic',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                animation: 'shake 0.4s ease'
+              }}>
+                <div style={{
+                  position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)',
+                  borderLeft: '10px solid transparent', borderRight: '10px solid transparent',
+                  borderBottom: '10px solid #f5e6c8'
+                }} />
                 {WRONG_MSGS[wrongIdx]}
-              </p>
+              </div>
             )}
           </form>
         </div>
@@ -224,8 +249,10 @@ function LockedScreen({ onUnlock, onBypass }) {
           background: 'rgba(212,168,83,0.06)',
           marginBottom: 28,
         }}>
-          <span style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
-            letterSpacing: '0.35em', textTransform: 'uppercase', color: '#d4a853' }}>
+          <span style={{
+            fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+            letterSpacing: '0.35em', textTransform: 'uppercase', color: '#d4a853'
+          }}>
             ✦  Sobre Confidencial  ✦
           </span>
         </div>
@@ -241,14 +268,16 @@ function LockedScreen({ onUnlock, onBypass }) {
           }}>en el tiempo exacto</span>
         </h1>
 
-        <p style={{ fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', fontWeight: 300, lineHeight: 1.7,
-          color: 'rgba(245,230,200,0.6)', marginBottom: 48 }}>
+        <p style={{
+          fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', fontWeight: 300, lineHeight: 1.7,
+          color: 'rgba(245,230,200,0.6)', marginBottom: 48
+        }}>
           Este portal se abre el <strong style={{ color: '#d4a853' }}>5 de marzo</strong>.<br />
           Algo muy especial te aguarda al otro lado.
         </p>
 
-        {/* Countdown */}
-        {timeLeft && (
+        {/* Countdown OR revealed code */}
+        {timeLeft ? (
           <div style={{
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid rgba(212,168,83,0.2)',
@@ -256,9 +285,11 @@ function LockedScreen({ onUnlock, onBypass }) {
             backdropFilter: 'blur(20px)',
             marginBottom: 32,
           }}>
-            <p style={{ fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
+            <p style={{
+              fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
               letterSpacing: '0.3em', textTransform: 'uppercase',
-              color: 'rgba(245,230,200,0.35)', marginBottom: 24 }}>
+              color: 'rgba(245,230,200,0.35)', marginBottom: 24
+            }}>
               Se abre en
             </p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -270,6 +301,46 @@ function LockedScreen({ onUnlock, onBypass }) {
               {sep}
               {unit(timeLeft.seconds, 'seg')}
             </div>
+          </div>
+        ) : (
+          /* Portal opened — show the code */
+          <div style={{
+            background: 'rgba(212,168,83,0.06)',
+            border: '1px solid rgba(212,168,83,0.35)',
+            borderRadius: 24, padding: '32px 28px',
+            backdropFilter: 'blur(20px)',
+            marginBottom: 32,
+            animation: 'pulse-glow 3s ease infinite',
+          }}>
+            <p style={{
+              fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
+              letterSpacing: '0.3em', textTransform: 'uppercase',
+              color: 'rgba(245,230,200,0.5)', marginBottom: 16
+            }}>
+              ✦  El portal se ha abierto  ✦
+            </p>
+            <p style={{
+              fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
+              letterSpacing: '0.25em', textTransform: 'uppercase',
+              color: 'rgba(212,168,83,0.6)', marginBottom: 14
+            }}>
+              Tu código de acceso:
+            </p>
+            <div style={{
+              fontSize: 'clamp(1.6rem, 6vw, 2.6rem)', fontWeight: 900, fontStyle: 'italic',
+              background: 'linear-gradient(135deg, #d4a853, #f5e6c8, #c4687a)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              letterSpacing: '0.08em', lineHeight: 1.2, marginBottom: 14,
+              filter: 'drop-shadow(0 0 20px rgba(212,168,83,0.5))',
+            }}>
+              LOVU INFINITO
+            </div>
+            <p style={{
+              fontSize: 11, fontFamily: 'system-ui',
+              color: 'rgba(245,230,200,0.35)', letterSpacing: '0.2em'
+            }}>
+              Escríbelo arriba para entrar ↑
+            </p>
           </div>
         )}
 
@@ -288,14 +359,15 @@ function LockedScreen({ onUnlock, onBypass }) {
 
 export default function App() {
   const [step, setStep] = useState('intro');
-  const [secretUnlocked, setSecretUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
 
-  // Date lock: only allow access on/after March 5, 2026 (unless secret code used)
-  if (new Date() < UNLOCK_DATE && !secretUnlocked) {
+  // Always show LockedScreen until a code is entered
+  if (!unlocked) {
     return (
       <LockedScreen
-        onUnlock={() => setSecretUnlocked(true)}
-        onBypass={() => { setSecretUnlocked(true); setStep('reveal'); }}
+        onUnlock={() => { setUnlocked(true); setStep('intro'); }}
+        onBypass={() => { setUnlocked(true); setStep('reveal'); }}
+        onLovu={() => { setUnlocked(true); setStep('intro'); }}
       />
     );
   }
@@ -305,10 +377,10 @@ export default function App() {
     setTimeout(() => setStep('reveal'), 4000);
   };
 
-  if (step === 'intro')      return <IntroScreen onStart={() => setStep('quiz')} />;
-  if (step === 'quiz')       return <QuizScreen onComplete={handleQuizComplete} />;
+  if (step === 'intro') return <IntroScreen onStart={() => setStep('quiz')} />;
+  if (step === 'quiz') return <QuizScreen onComplete={handleQuizComplete} />;
   if (step === 'collapsing') return <CollapsingScreen />;
-  if (step === 'reveal')     return <RevealScreen />;
+  if (step === 'reveal') return <RevealScreen />;
 
   return <IntroScreen onStart={() => setStep('quiz')} />;
 }
