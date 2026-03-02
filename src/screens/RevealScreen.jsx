@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Plane, Mountain, Sparkles, Heart, Calendar, Star, Car, Sunrise } from 'lucide-react';
+import { MapPin, Plane, Mountain, Sparkles, Heart, Calendar, Star, Car, Sunrise, Users, Home } from 'lucide-react';
 
 const confirmations = [
   { label: "Vuelo Mariana  ·  Iberia / AA",     status: "✓ Confirmado" },
@@ -545,6 +545,121 @@ export default function RevealScreen() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* ── Return to Madrid photo card ── */}
+          <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(212,168,83,0.18)',
+            borderRadius: 28, overflow: 'hidden',
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'all 1s ease 0.95s',
+          }}>
+            {/* Photo */}
+            <div style={{ position: 'relative', height: 220, overflow: 'hidden' }}>
+              <img
+                src="/photos/6b6c39ca-2004-4484-ac7e-7ccbe6681e77.jpg"
+                alt=""
+                style={{
+                  position: 'absolute', inset: 0,
+                  width: '100%', height: '100%',
+                  objectFit: 'cover', objectPosition: 'center',
+                  filter: 'brightness(0.75)',
+                }}
+              />
+              {/* Gradient overlay */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(to bottom, transparent 30%, rgba(7,0,14,0.85) 100%)',
+              }} />
+              {/* Plane badge */}
+              <div style={{
+                position: 'absolute', top: 16, left: 16,
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                padding: '5px 14px', borderRadius: 100,
+                background: 'rgba(7,0,14,0.5)', border: '1px solid rgba(212,168,83,0.35)',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <Plane style={{ width: 12, height: 12, color: '#d4a853' }} />
+                <span style={{ fontSize: 9, fontFamily: 'system-ui', fontWeight: 800,
+                  letterSpacing: '0.3em', textTransform: 'uppercase', color: '#d4a853' }}>
+                  Lun 13 · DEN → MAD
+                </span>
+              </div>
+            </div>
+            {/* Text */}
+            <div style={{ padding: '24px 28px' }}>
+              <p style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+                letterSpacing: '0.3em', textTransform: 'uppercase', color: '#d4a853', marginBottom: 10 }}>
+                El Regreso
+              </p>
+              <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.1rem)', fontWeight: 300,
+                fontStyle: 'italic', color: 'rgba(245,230,200,0.85)', lineHeight: 1.7 }}>
+                "Regreso a Madrid juntos, después de un viaje inolvidable y llenos de energía."
+              </p>
+            </div>
+          </div>
+
+          {/* ── Family reunion card ── */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(212,168,83,0.08), rgba(196,104,122,0.06))',
+            border: '1px solid rgba(212,168,83,0.2)',
+            borderRadius: 28, padding: '36px 28px',
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'all 1s ease 1.05s',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* Watermark */}
+            <Home style={{
+              position: 'absolute', bottom: -24, right: -24,
+              width: 140, height: 140,
+              color: 'rgba(212,168,83,0.05)', strokeWidth: 1,
+            }} />
+
+            {/* Icon cluster */}
+            <div style={{ display: 'flex', gap: 12, marginBottom: 28 }}>
+              {[
+                { Icon: Users, color: '#d4a853', bg: 'rgba(212,168,83,0.12)' },
+                { Icon: Heart, color: '#c4687a', bg: 'rgba(196,104,122,0.12)' },
+                { Icon: Home,  color: '#6ee7b7', bg: 'rgba(110,231,183,0.10)' },
+              ].map(({ Icon, color, bg }, i) => (
+                <div key={i} style={{
+                  width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                  background: bg, border: `1px solid ${color}30`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Icon style={{ width: 20, height: 20, color, fill: Icon === Heart ? color : 'none',
+                    animation: Icon === Heart ? 'heartbeat 2s ease infinite' : 'none' }} />
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <p style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+                letterSpacing: '0.3em', textTransform: 'uppercase', color: '#d4a853', marginBottom: 12 }}>
+                Lo que nos espera
+              </p>
+              <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.1rem)', fontWeight: 300,
+                fontStyle: 'italic', color: 'rgba(245,230,200,0.85)', lineHeight: 1.8, marginBottom: 20 }}>
+                "El mayor tesoro que traeremos de vuelta no cabrá en ninguna maleta — será la versión
+                más expandida de nosotros, lista para abrazar a quienes más amamos."
+              </p>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 18px', borderRadius: 12,
+                background: 'rgba(212,168,83,0.07)', border: '1px solid rgba(212,168,83,0.15)',
+                width: 'fit-content',
+              }}>
+                <Users style={{ width: 14, height: 14, color: '#d4a853' }} />
+                <span style={{ fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
+                  color: 'rgba(245,230,200,0.5)', letterSpacing: '0.15em' }}>
+                  Familia · Casa · Amor
+                </span>
+              </div>
             </div>
           </div>
 
