@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Plane, Mountain, Sparkles, Heart, Calendar, Star } from 'lucide-react';
+import { MapPin, Plane, Mountain, Sparkles, Heart, Calendar, Star, Car, Sunrise } from 'lucide-react';
 
 const confirmations = [
   { label: "Vuelo Mariana  ·  Iberia / AA",     status: "✓ Confirmado" },
@@ -20,6 +20,100 @@ const highlights = [
     title: "Breckenridge Post-Retiro", desc: "One Ski Hill Place · 3 días en las pistas de esquí, en el corazón de la montaña." },
 ];
 
+// ── Itinerary data ──
+const itinerary = [
+  {
+    date: 'Jue 2 Abr',
+    icon: Plane,
+    color: '#93c5fd',
+    bg: 'rgba(147,197,253,0.08)',
+    label: 'Llegada Juan Carlos',
+    detail: 'Vuelo AA2027/420 · QRO → DFW → DEN',
+    sub: 'Llega a Denver · 1:57 PM',
+    tag: null,
+  },
+  {
+    date: 'Vie 3 Abr',
+    icon: Plane,
+    color: '#c4687a',
+    bg: 'rgba(196,104,122,0.08)',
+    label: 'Llegada Mariana ✈',
+    detail: 'MAD → DFW → DEN · Iberia / AA',
+    sub: 'Juan Carlos ya te espera en Denver 🤍',
+    tag: null,
+  },
+  {
+    date: 'Sáb 4 Abr',
+    icon: Sparkles,
+    color: '#d4a853',
+    bg: 'rgba(212,168,83,0.08)',
+    label: 'Inicio del Retiro',
+    detail: 'Registro: 10:00 AM – 5:00 PM',
+    sub: 'Apertura del salón: 5:30 PM · Inicio: 6:00 PM',
+    tag: 'ENCEPHALON',
+  },
+  {
+    date: 'Dom 5 – Jue 9',
+    icon: Sunrise,
+    color: '#a78bfa',
+    bg: 'rgba(167,139,250,0.08)',
+    label: 'Retiro Dr. Joe Dispenza',
+    detail: 'Sesiones intensivas · Gaylord Rockies Resort',
+    sub: 'Inicio diario ~4:00 AM / 6:00 AM · Aurora, Colorado',
+    tag: '5 DÍAS',
+  },
+  {
+    date: 'Vie 10 Abr',
+    icon: Star,
+    color: '#6ee7b7',
+    bg: 'rgba(110,231,183,0.08)',
+    label: 'Fin del Retiro',
+    detail: 'Clausura aprox. 2:00 PM',
+    sub: 'Integración y celebración 🌿',
+    tag: null,
+  },
+  {
+    date: 'Vie 10 Abr',
+    icon: Car,
+    color: '#fbbf24',
+    bg: 'rgba(251,191,36,0.08)',
+    label: 'Traslado a la Montaña',
+    detail: 'Renta de auto · 3:30 PM · Denver Airport (Dollar)',
+    sub: 'Conducir a Breckenridge, Colorado',
+    tag: null,
+  },
+  {
+    date: 'Vie 10 – Lun 13',
+    icon: Mountain,
+    color: '#6ee7b7',
+    bg: 'rgba(110,231,183,0.08)',
+    label: 'Breckenridge',
+    detail: 'One Ski Hill Place · Descanso e integración',
+    sub: '3 noches en el corazón de la montaña nevada',
+    tag: '3 NOCHES',
+  },
+  {
+    date: 'Lun 13 Abr',
+    icon: Plane,
+    color: '#93c5fd',
+    bg: 'rgba(147,197,253,0.08)',
+    label: 'Regreso a España',
+    detail: 'Vuelo 5:44 PM · DEN → ORD → MAD',
+    sub: 'Juan Carlos y Mariana viajan juntos a Madrid 🤍',
+    tag: null,
+  },
+  {
+    date: 'Mar 14 Abr',
+    icon: MapPin,
+    color: '#c4687a',
+    bg: 'rgba(196,104,122,0.08)',
+    label: 'Llegada a Madrid',
+    detail: 'Aterrizaje Terminal 4S · 1:30 PM',
+    sub: 'De vuelta a casa, transformados',
+    tag: null,
+  },
+];
+
 export default function RevealScreen() {
   const [visible, setVisible] = useState(false);
 
@@ -36,7 +130,6 @@ export default function RevealScreen() {
         padding: '80px 24px 120px',
         textAlign: 'center',
       }}>
-        {/* Decorative rings */}
         {[300, 500, 700].map((s, i) => (
           <div key={i} className="absolute rounded-full pointer-events-none"
             style={{
@@ -46,8 +139,6 @@ export default function RevealScreen() {
               transform: 'translate(-50%,-50%)',
             }} />
         ))}
-
-        {/* Shooting stars */}
         {[...Array(3)].map((_, i) => (
           <div key={i} style={{
             position: 'absolute', height: 1, width: 180,
@@ -64,7 +155,6 @@ export default function RevealScreen() {
           transition: 'all 1.2s cubic-bezier(0.16,1,0.3,1)',
           position: 'relative', zIndex: 10,
         }}>
-          {/* Badge */}
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 10,
             padding: '8px 24px', borderRadius: 100,
@@ -78,7 +168,6 @@ export default function RevealScreen() {
             </span>
           </div>
 
-          {/* Main title */}
           <div style={{
             fontSize: 'clamp(3.5rem, 14vw, 9rem)',
             fontWeight: 900, lineHeight: 0.9,
@@ -94,7 +183,6 @@ export default function RevealScreen() {
             }}>CUMPLEAÑOS!</div>
           </div>
 
-          {/* Ornament */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 28 }}>
             <div style={{ height: 1, width: 60, background: 'linear-gradient(to right, transparent, rgba(212,168,83,0.5))' }} />
             <Heart style={{ width: 18, height: 18, color: '#c4687a', fill: '#c4687a', animation: 'heartbeat 1.5s ease infinite' }} />
@@ -144,12 +232,11 @@ export default function RevealScreen() {
               }}>
                 <Calendar style={{ width: 16, height: 16, color: '#07000e', margin: '0 auto 4px', opacity: 0.7 }} />
                 <div style={{ fontSize: 10, fontWeight: 800, color: '#07000e', letterSpacing: '0.2em', opacity: 0.7 }}>ABRIL</div>
-                <div style={{ fontSize: 36, fontWeight: 900, color: '#07000e', lineHeight: 1 }}>04–10</div>
+                <div style={{ fontSize: 36, fontWeight: 900, color: '#07000e', lineHeight: 1 }}>02–14</div>
                 <div style={{ fontSize: 10, fontWeight: 800, color: '#07000e', letterSpacing: '0.2em', opacity: 0.7 }}>2026</div>
               </div>
             </div>
 
-            {/* 4 highlights grid */}
             <div style={{
               display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: 20, borderTop: '1px solid rgba(212,168,83,0.1)', paddingTop: 28,
@@ -175,6 +262,106 @@ export default function RevealScreen() {
             </div>
           </div>
 
+          {/* ── ITINERARY ── */}
+          <div style={{
+            gridColumn: '1 / -1',
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(212,168,83,0.18)',
+            borderRadius: 28, padding: '36px 32px',
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'all 1s ease 0.45s',
+          }}>
+            {/* Section header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                background: 'rgba(212,168,83,0.1)', border: '1px solid rgba(212,168,83,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Calendar style={{ width: 20, height: 20, color: '#d4a853' }} />
+              </div>
+              <div>
+                <p style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+                  letterSpacing: '0.3em', textTransform: 'uppercase', color: '#d4a853', marginBottom: 2 }}>
+                  Abril 2026
+                </p>
+                <h3 style={{ fontSize: 22, fontWeight: 900, fontStyle: 'italic', color: '#f5e6c8', lineHeight: 1 }}>
+                  Itinerario Completo del Viaje
+                </h3>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div style={{ position: 'relative' }}>
+              {/* Vertical line */}
+              <div style={{
+                position: 'absolute', left: 19, top: 8, bottom: 8, width: 1,
+                background: 'linear-gradient(to bottom, rgba(212,168,83,0.4), rgba(196,104,122,0.2), rgba(212,168,83,0.1))',
+              }} />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {itinerary.map((item, i) => {
+                  const Icon = item.icon;
+                  const isLast = i === itinerary.length - 1;
+                  return (
+                    <div key={i} style={{ display: 'flex', gap: 20, paddingBottom: isLast ? 0 : 24, position: 'relative' }}>
+                      {/* Dot */}
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                        background: item.bg,
+                        border: `1.5px solid ${item.color}60`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        position: 'relative', zIndex: 2,
+                        boxShadow: `0 0 12px ${item.color}20`,
+                      }}>
+                        <Icon style={{ width: 16, height: 16, color: item.color }} />
+                      </div>
+
+                      {/* Content */}
+                      <div style={{
+                        flex: 1, paddingTop: 8,
+                        borderBottom: isLast ? 'none' : '1px solid rgba(212,168,83,0.06)',
+                        paddingBottom: isLast ? 0 : 20,
+                      }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          {/* Date chip */}
+                          <span style={{
+                            fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+                            letterSpacing: '0.2em', textTransform: 'uppercase',
+                            color: item.color, background: item.bg,
+                            padding: '3px 10px', borderRadius: 100,
+                            border: `1px solid ${item.color}30`,
+                          }}>{item.date}</span>
+
+                          {item.tag && (
+                            <span style={{
+                              fontSize: 9, fontFamily: 'system-ui', fontWeight: 800,
+                              letterSpacing: '0.2em', textTransform: 'uppercase',
+                              color: '#07000e',
+                              background: `linear-gradient(135deg, #d4a853, #c4687a)`,
+                              padding: '3px 10px', borderRadius: 100,
+                            }}>{item.tag}</span>
+                          )}
+                        </div>
+
+                        <p style={{ fontSize: 15, fontWeight: 700, color: '#f5e6c8', marginBottom: 3 }}>
+                          {item.label}
+                        </p>
+                        <p style={{ fontSize: 12, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.55)', marginBottom: 2, lineHeight: 1.5 }}>
+                          {item.detail}
+                        </p>
+                        <p style={{ fontSize: 11, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.35)', lineHeight: 1.4 }}>
+                          {item.sub}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
           {/* ── Confirmation list ── */}
           <div style={{
             background: 'rgba(255,255,255,0.03)',
@@ -182,7 +369,7 @@ export default function RevealScreen() {
             borderRadius: 24, padding: '28px 24px',
             opacity: visible ? 1 : 0,
             transform: visible ? 'translateY(0)' : 'translateY(40px)',
-            transition: 'all 1s ease 0.5s',
+            transition: 'all 1s ease 0.6s',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6ee7b7',
@@ -215,9 +402,8 @@ export default function RevealScreen() {
             position: 'relative', overflow: 'hidden',
             opacity: visible ? 1 : 0,
             transform: visible ? 'translateY(0)' : 'translateY(40px)',
-            transition: 'all 1s ease 0.7s',
+            transition: 'all 1s ease 0.75s',
           }}>
-            {/* Watermark heart */}
             <Heart style={{
               position: 'absolute', bottom: -20, right: -20,
               width: 120, height: 120, color: 'rgba(212,168,83,0.06)', fill: 'currentColor',
