@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { MapPin, Plane, Mountain, Sparkles, Heart, Calendar, Star, Car, Sunrise } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MapPin, Plane, Mountain, Sparkles, Heart, Calendar, Star, Car, Sunrise, Home } from 'lucide-react';
 
 // ── All 40 photos ──
 const ALL_PHOTOS = [
@@ -25,50 +25,65 @@ const ALL_PHOTOS = [
   'IMG_9400.jpeg',
 ];
 
-const QUANTUM_CHARS =
-  '01アイウエオカキクケコサシスセソタチツテトψ∞∆Ωφℏ量子宇宙AMORVIDAMARIANAJC';
+const QUANTUM_CHARS = '01アイウエオカキクケコサシスセソタチツテトψ∞∆Ωφℏ量子宇宙AMORVIDAMARIANAJC';
+const VISIBLE = 4; // collage photos shown at a time
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function randomCollagePos(cardW, cardH) {
+  const w = cardW || 600;
+  const h = cardH || 500;
+  return {
+    x:  (Math.random() * (w * 0.7)) - (w * 0.35),
+    y:  (Math.random() * (h * 0.55)) - (h * 0.27),
+    r:  (Math.random() * 36) - 18,
+    z:  Math.floor(Math.random() * 8) + 1,
+  };
+}
 
 // ── Quantum Card ──
 function QuantumCard({ visible }) {
   const [active, setActive] = useState(false);
   const canvasRef = useRef(null);
   const dropsRef  = useRef([]);
+  const cardRef   = useRef(null);
 
-  // Stable idle scatter (deterministic)
-  const idlePos = useMemo(() =>
-    ALL_PHOTOS.map((_, i) => ({
-      x: ((i * 47 + 11) % 200) - 100,
-      y: ((i * 61 + 7)  % 160) - 80,
-      r: ((i * 73)      % 60)  - 30,
-    })), []);
+  // Pool of 4 photos shown + their positions
+  const [shown, setShown]   = useState(() => shuffle(ALL_PHOTOS).slice(0, VISIBLE));
+  const [poses, setPoses]   = useState(() => Array(VISIBLE).fill(null).map(() => randomCollagePos()));
 
-  const [activePos, setActivePos] = useState(() =>
-    ALL_PHOTOS.map(() => ({
-      x: (Math.random() * 700 - 350),
-      y: (Math.random() * 380 - 190),
-      r: (Math.random() * 540 - 270),
-      s: 0.45 + Math.random() * 0.75,
-    }))
-  );
-
+  // Cycle photos + positions on interval
   useEffect(() => {
     if (!active) return;
 
-    // Randomise photos periodically
-    const randomize = () => setActivePos(
-      ALL_PHOTOS.map(() => ({
-        x: (Math.random() * 700 - 350),
-        y: (Math.random() * 380 - 190),
-        r: (Math.random() * 540 - 270),
-        s: 0.45 + Math.random() * 0.75,
-      }))
-    );
-    randomize();
-    const ticker = setInterval(randomize, 2600);
+    const cycle = () => {
+      const w = cardRef.current?.offsetWidth;
+      const h = cardRef.current?.offsetHeight;
+      // rotate 2 photos out, keep 2
+      setShown(prev => {
+        const keep = [...prev];
+        const pool = shuffle(ALL_PHOTOS.filter(p => !prev.includes(p)));
+        const swapCount = 2;
+        const idxs = shuffle([0,1,2,3]).slice(0, swapCount);
+        idxs.forEach((idx, i) => { keep[idx] = pool[i] ?? keep[idx]; });
+        return keep;
+      });
+      setPoses(Array(VISIBLE).fill(null).map(() => randomCollagePos(w, h)));
+    };
 
-    // Matrix rain
+    cycle();
+    const id = setInterval(cycle, 2800);
+
+    // Matrix rain canvas
     const canvas = canvasRef.current;
-    if (!canvas) return () => clearInterval(ticker);
+    if (!canvas) return () => clearInterval(id);
     const rect = canvas.getBoundingClientRect();
     canvas.width  = Math.floor(rect.width);
     canvas.height = Math.floor(rect.height);
@@ -84,13 +99,13 @@ function QuantumCard({ visible }) {
       ctx.fillStyle = 'rgba(7,0,14,0.055)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       dropsRef.current.forEach((_, i) => {
-        const char  = QUANTUM_CHARS[Math.floor(Math.random() * QUANTUM_CHARS.length)];
+        const char = QUANTUM_CHARS[Math.floor(Math.random() * QUANTUM_CHARS.length)];
         const isGold  = Math.random() < 0.07;
         const isWhite = Math.random() < 0.02;
         ctx.fillStyle = isGold
-          ? `rgba(212,168,83,${0.65 + Math.random() * 0.35})`
+          ? `rgba(212,168,83,${0.7 + Math.random() * 0.3})`
           : isWhite
-            ? `rgba(245,230,200,0.9)`
+            ? 'rgba(245,230,200,0.9)'
             : `rgba(0,${180 + Math.floor(Math.random() * 75)},${50 + Math.floor(Math.random() * 30)},${0.35 + Math.random() * 0.55})`;
         ctx.font = `${10 + Math.floor(Math.random() * 4)}px monospace`;
         ctx.fillText(char, i * cw, dropsRef.current[i] * cw);
@@ -104,7 +119,7 @@ function QuantumCard({ visible }) {
     animId = requestAnimationFrame(draw);
 
     return () => {
-      clearInterval(ticker);
+      clearInterval(id);
       cancelAnimationFrame(animId);
       const c = canvasRef.current;
       if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
@@ -113,9 +128,10 @@ function QuantumCard({ visible }) {
 
   return (
     <div
+      ref={cardRef}
       onClick={() => setActive(v => !v)}
       style={{
-        height: 500, borderRadius: 28, overflow: 'hidden',
+        height: 520, borderRadius: 28, overflow: 'hidden',
         position: 'relative', cursor: 'pointer',
         background: 'radial-gradient(ellipse at 50% 50%, #0d001f 0%, #07000e 100%)',
         border: active
@@ -123,38 +139,38 @@ function QuantumCard({ visible }) {
           : '1px solid rgba(212,168,83,0.2)',
         opacity: visible ? 1 : 0,
         transform: visible ? 'translateY(0)' : 'translateY(40px)',
-        transition: 'all 1s ease 1.05s',
+        transition: 'border-color 0.5s ease, opacity 1s ease 1.05s, transform 1s ease 1.05s',
         userSelect: 'none',
       }}
     >
-      {/* ── Photos layer ── */}
+      {/* ── Collage photos (4 large, overlapping) ── */}
       <div style={{ position: 'absolute', inset: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {ALL_PHOTOS.map((photo, i) => {
-          const pos = active
-            ? activePos[i]
-            : { x: idlePos[i].x, y: idlePos[i].y, r: idlePos[i].r, s: 0.32 };
-          return (
-            <img
-              key={photo}
-              src={`/photos/${encodeURIComponent(photo)}`}
-              alt=""
-              style={{
-                position: 'absolute',
-                width: 78, height: 104,
-                objectFit: 'cover',
-                borderRadius: 6,
-                border: active
-                  ? '1px solid rgba(0,220,80,0.25)'
-                  : '1px solid rgba(212,168,83,0.08)',
-                transform: `translate(${pos.x}px,${pos.y}px) rotate(${pos.r}deg) scale(${pos.s ?? 0.32})`,
-                opacity: active ? 0.72 : 0.10,
-                transition: 'all 1.9s cubic-bezier(0.16,1,0.3,1)',
-                boxShadow: active ? '0 0 12px rgba(0,220,80,0.12)' : 'none',
-              }}
-            />
-          );
-        })}
+        {shown.map((photo, i) => (
+          <img
+            key={`${photo}-${i}`}
+            src={`/photos/${encodeURIComponent(photo)}`}
+            alt=""
+            style={{
+              position: 'absolute',
+              width: 165, height: 220,
+              objectFit: 'cover',
+              borderRadius: 10,
+              border: active
+                ? '2px solid rgba(0,220,80,0.3)'
+                : '2px solid rgba(212,168,83,0.15)',
+              transform: active
+                ? `translate(${poses[i].x}px,${poses[i].y}px) rotate(${poses[i].r}deg)`
+                : `translate(${((i-1.5)*55)}px, ${((i%2===0)?-20:20)}px) rotate(${(i-1.5)*6}deg)`,
+              opacity: active ? 0.88 : 0.18,
+              zIndex: active ? poses[i].z : i + 1,
+              transition: 'all 1.6s cubic-bezier(0.16,1,0.3,1)',
+              boxShadow: active
+                ? '0 8px 40px rgba(0,0,0,0.7), 0 0 20px rgba(0,220,80,0.12)'
+                : '0 4px 20px rgba(0,0,0,0.5)',
+            }}
+          />
+        ))}
       </div>
 
       {/* ── Matrix canvas ── */}
@@ -163,7 +179,7 @@ function QuantumCard({ visible }) {
         style={{
           position: 'absolute', inset: 0,
           width: '100%', height: '100%',
-          opacity: active ? 0.82 : 0,
+          opacity: active ? 0.75 : 0,
           transition: 'opacity 0.6s ease',
           pointerEvents: 'none',
         }}
@@ -172,7 +188,7 @@ function QuantumCard({ visible }) {
       {/* ── Edge vignette ── */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(7,0,14,0.75) 100%)',
+        background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(7,0,14,0.78) 100%)',
       }} />
 
       {/* ── Center UI ── */}
@@ -180,12 +196,11 @@ function QuantumCard({ visible }) {
         position: 'absolute', inset: 0,
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        zIndex: 10, textAlign: 'center', padding: 24,
+        zIndex: 20, textAlign: 'center', padding: 24,
         pointerEvents: 'none',
       }}>
         {!active ? (
           <>
-            {/* Idle rings */}
             {[80,130,180].map((s,i) => (
               <div key={i} style={{
                 position: 'absolute', borderRadius: '50%', width: s, height: s,
@@ -193,7 +208,9 @@ function QuantumCard({ visible }) {
                 animation: `ping-slow ${2+i*0.6}s ease-out ${i*0.4}s infinite`,
               }} />
             ))}
-            <div style={{ fontSize: 44, marginBottom: 16, filter: 'drop-shadow(0 0 18px rgba(212,168,83,0.6))' }}>⚛️</div>
+            <div style={{ fontSize: 44, marginBottom: 16,
+              filter: 'drop-shadow(0 0 18px rgba(212,168,83,0.6))',
+              animation: 'heartbeat 3s ease infinite' }}>⚛️</div>
             <p style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
               letterSpacing: '0.4em', textTransform: 'uppercase',
               color: 'rgba(212,168,83,0.65)', marginBottom: 12 }}>
@@ -205,14 +222,16 @@ function QuantumCard({ visible }) {
             </h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ height: 1, width: 30, background: 'linear-gradient(to right,transparent,rgba(212,168,83,0.4))' }} />
-              <p style={{ fontSize: 10, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.3)',
-                letterSpacing: '0.3em', textTransform: 'uppercase' }}>toca para activar</p>
+              <p style={{ fontSize: 10, fontFamily: 'system-ui',
+                color: 'rgba(245,230,200,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase' }}>
+                toca para activar
+              </p>
               <div style={{ height: 1, width: 30, background: 'linear-gradient(to left,transparent,rgba(212,168,83,0.4))' }} />
             </div>
           </>
         ) : (
           <div style={{
-            background: 'rgba(7,0,14,0.6)', backdropFilter: 'blur(6px)',
+            background: 'rgba(7,0,14,0.65)', backdropFilter: 'blur(8px)',
             border: '1px solid rgba(0,220,80,0.3)', borderRadius: 18,
             padding: '18px 28px', textAlign: 'center',
           }}>
@@ -226,7 +245,7 @@ function QuantumCard({ visible }) {
               marginBottom: 10 }}>
               Familia · Amor · Vida
             </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 10 }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
               {['MADRID','DENVER','BRECKENRIDGE','AMOR'].map(w => (
                 <span key={w} style={{
                   fontSize: 8, fontFamily: 'monospace', fontWeight: 800,
@@ -236,8 +255,10 @@ function QuantumCard({ visible }) {
                 }}>{w}</span>
               ))}
             </div>
-            <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'rgba(0,220,80,0.4)',
-              letterSpacing: '0.2em' }}>toca para cerrar</p>
+            <p style={{ fontSize: 9, fontFamily: 'monospace',
+              color: 'rgba(0,220,80,0.4)', letterSpacing: '0.2em' }}>
+              toca para cerrar
+            </p>
           </div>
         )}
       </div>
@@ -248,34 +269,39 @@ function QuantumCard({ visible }) {
 // ─────────────────────────────────────────
 
 const confirmations = [
-  { label: "Vuelo Mariana  ·  Iberia / AA",                status: "✓ Confirmado" },
-  { label: "Gaylord Rockies Resort  ·  8 noches",          status: "✓ Confirmado" },
-  { label: "Retiro Encephalon  ·  Dr. Joe",                status: "✓ Confirmado" },
-  { label: "JEEP Wrangler  ·  Renta",                      status: "✓ Confirmado" },
+  { label: "Vuelo Mariana  ·  Iberia / AA",                    status: "✓ Confirmado" },
+  { label: "Gaylord Rockies Resort  ·  8 noches",              status: "✓ Confirmado" },
+  { label: "Retiro Encephalon  ·  Dr. Joe",                    status: "✓ Confirmado" },
+  { label: "JEEP Wrangler  ·  Renta",                          status: "✓ Confirmado" },
   { label: "One Ski Hill Place  ·  Breckenridge  ·  3 noches", status: "✓ Confirmado" },
 ];
 
+// 6 highlights — the original 4 + 2 new ones
 const highlights = [
   { icon: MapPin,   color: '#c4687a', bg: 'rgba(196,104,122,0.1)',
-    title: "Gaylord Rockies Resort", desc: "Aurora, Colorado · Mountain View Upgrade — despertarás frente a los picos nevados." },
+    title: "Gaylord Rockies Resort",    desc: "Aurora, Colorado · Mountain View Upgrade — despertarás frente a los picos nevados." },
   { icon: Sparkles, color: '#d4a853', bg: 'rgba(212,168,83,0.1)',
-    title: "Retiro Encephalon 2026", desc: "7 días de inmersión con Dr. Joe Dispenza para conectar con el vacío cuántico." },
+    title: "Retiro Encephalon 2026",    desc: "7 días de inmersión con Dr. Joe Dispenza para conectar con el vacío cuántico." },
   { icon: Plane,    color: '#93c5fd', bg: 'rgba(147,197,253,0.1)',
-    title: "Vuelos Iberia / American", desc: "MAD → DFW → DEN · Confort, espacio y asientos ya elegidos contigo en mente." },
+    title: "Vuelos Iberia / American",  desc: "MAD → DFW → DEN · Confort, espacio y asientos ya elegidos contigo en mente." },
   { icon: Mountain, color: '#6ee7b7', bg: 'rgba(110,231,183,0.1)',
-    title: "Breckenridge Post-Retiro", desc: "One Ski Hill Place · 3 días en las pistas de esquí, en el corazón de la montaña." },
+    title: "Breckenridge Post-Retiro",  desc: "One Ski Hill Place · 3 días en las pistas de esquí, en el corazón de la montaña." },
+  { icon: Plane,    color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',
+    title: "El Regreso a Casa",         desc: "DEN → ORD → MAD · Regresamos juntos, transformados y llenos de energía." },
+  { icon: Home,     color: '#a78bfa', bg: 'rgba(167,139,250,0.1)',
+    title: "Familia · Casa · Amor",     desc: "De vuelta con quienes más amamos, renovados y listos para abrazar a nuestra gente." },
 ];
 
 const itinerary = [
-  { date:'Jue 2 Abr',      icon:Plane,   color:'#93c5fd', bg:'rgba(147,197,253,0.08)', label:'Llegada Juan Carlos',       detail:'Vuelo AA2027/420 · QRO → DFW → DEN', sub:'Llega a Denver · 1:57 PM',                    tag:null },
-  { date:'Vie 3 Abr',      icon:Plane,   color:'#c4687a', bg:'rgba(196,104,122,0.08)', label:'Llegada Mariana ✈',         detail:'MAD → DFW → DEN · Iberia / AA',       sub:'Juan Carlos ya te espera en Denver 🤍',       tag:null },
-  { date:'Sáb 4 Abr',      icon:Sparkles,color:'#d4a853', bg:'rgba(212,168,83,0.08)',  label:'Inicio del Retiro',         detail:'Registro: 10:00 AM – 5:00 PM',        sub:'Apertura del salón: 5:30 PM · Inicio: 6:00 PM', tag:'ENCEPHALON' },
-  { date:'Dom 5 – Jue 9',  icon:Sunrise, color:'#a78bfa', bg:'rgba(167,139,250,0.08)', label:'Retiro Dr. Joe Dispenza',   detail:'Sesiones intensivas · Gaylord Rockies',sub:'Inicio diario ~4:00 AM / 6:00 AM · Aurora, CO', tag:'5 DÍAS' },
-  { date:'Vie 10 Abr',     icon:Star,    color:'#6ee7b7', bg:'rgba(110,231,183,0.08)', label:'Fin del Retiro',            detail:'Clausura aprox. 2:00 PM',             sub:'Integración y celebración 🌿',                tag:null },
-  { date:'Vie 10 Abr',     icon:Car,     color:'#fbbf24', bg:'rgba(251,191,36,0.08)',  label:'Traslado a la Montaña',     detail:'Renta de auto · 3:30 PM · Denver Airport (Dollar)', sub:'Conducir a Breckenridge, Colorado', tag:null },
-  { date:'Vie 10 – Lun 13',icon:Mountain,color:'#6ee7b7', bg:'rgba(110,231,183,0.08)', label:'Breckenridge',             detail:'One Ski Hill Place · Descanso e integración', sub:'3 noches en el corazón de la montaña nevada', tag:'3 NOCHES' },
-  { date:'Lun 13 Abr',     icon:Plane,   color:'#93c5fd', bg:'rgba(147,197,253,0.08)', label:'Regreso a España',         detail:'Vuelo 5:44 PM · DEN → ORD → MAD',    sub:'Juan Carlos y Mariana viajan juntos a Madrid 🤍', tag:null },
-  { date:'Mar 14 Abr',     icon:MapPin,  color:'#c4687a', bg:'rgba(196,104,122,0.08)', label:'Llegada a Madrid',         detail:'Aterrizaje Terminal 4S · 1:30 PM',     sub:'De vuelta a casa, transformados',             tag:null },
+  { date:'Jue 2 Abr',      icon:Plane,   color:'#93c5fd', bg:'rgba(147,197,253,0.08)', label:'Llegada Juan Carlos',     detail:'Vuelo AA2027/420 · QRO → DFW → DEN', sub:'Llega a Denver · 1:57 PM',                    tag:null },
+  { date:'Vie 3 Abr',      icon:Plane,   color:'#c4687a', bg:'rgba(196,104,122,0.08)', label:'Llegada Mariana ✈',       detail:'MAD → DFW → DEN · Iberia / AA',       sub:'Juan Carlos ya te espera en Denver 🤍',       tag:null },
+  { date:'Sáb 4 Abr',      icon:Sparkles,color:'#d4a853', bg:'rgba(212,168,83,0.08)',  label:'Inicio del Retiro',       detail:'Registro: 10:00 AM – 5:00 PM',        sub:'Apertura del salón: 5:30 PM · Inicio: 6:00 PM', tag:'ENCEPHALON' },
+  { date:'Dom 5 – Jue 9',  icon:Sunrise, color:'#a78bfa', bg:'rgba(167,139,250,0.08)', label:'Retiro Dr. Joe Dispenza', detail:'Sesiones intensivas · Gaylord Rockies',sub:'Inicio diario ~4:00 AM / 6:00 AM · Aurora, CO', tag:'5 DÍAS' },
+  { date:'Vie 10 Abr',     icon:Star,    color:'#6ee7b7', bg:'rgba(110,231,183,0.08)', label:'Fin del Retiro',          detail:'Clausura aprox. 2:00 PM',             sub:'Integración y celebración 🌿',                tag:null },
+  { date:'Vie 10 Abr',     icon:Car,     color:'#fbbf24', bg:'rgba(251,191,36,0.08)',  label:'Traslado a la Montaña',   detail:'Renta · 3:30 PM · Denver Airport (Dollar)', sub:'Conducir a Breckenridge, Colorado',       tag:null },
+  { date:'Vie 10 – Lun 13',icon:Mountain,color:'#6ee7b7', bg:'rgba(110,231,183,0.08)', label:'Breckenridge',           detail:'One Ski Hill Place · Descanso e integración', sub:'3 noches en el corazón de la montaña nevada', tag:'3 NOCHES' },
+  { date:'Lun 13 Abr',     icon:Plane,   color:'#93c5fd', bg:'rgba(147,197,253,0.08)', label:'Regreso a España',        detail:'Vuelo 5:44 PM · DEN → ORD → MAD',    sub:'Juan Carlos y Mariana viajan juntos a Madrid 🤍', tag:null },
+  { date:'Mar 14 Abr',     icon:MapPin,  color:'#c4687a', bg:'rgba(196,104,122,0.08)', label:'Llegada a Madrid',        detail:'Aterrizaje Terminal 4S · 1:30 PM',     sub:'De vuelta a casa, transformados',             tag:null },
 ];
 
 // ─────────────────────────────────────────
@@ -307,9 +333,8 @@ export default function RevealScreen() {
             animation:`shooting-star ${5+i}s linear ${i*2}s infinite`, opacity:0,
           }} />
         ))}
-
         <div style={{
-          opacity: visible?1:0, transform: visible?'translateY(0)':'translateY(30px)',
+          opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(30px)',
           transition:'all 1.2s cubic-bezier(0.16,1,0.3,1)', position:'relative', zIndex:10,
         }}>
           <div style={{
@@ -322,7 +347,6 @@ export default function RevealScreen() {
               ✦  15 / 15  ·  Sincronización Completada  ✦
             </span>
           </div>
-
           <div style={{
             fontSize:'clamp(3.5rem,14vw,9rem)', fontWeight:900, lineHeight:0.9,
             fontStyle:'italic', letterSpacing:'-0.02em', marginBottom:16,
@@ -334,17 +358,14 @@ export default function RevealScreen() {
               backgroundSize:'200% 100%', animation:'shimmer 4s linear infinite',
             }}>CUMPLEAÑOS!</div>
           </div>
-
           <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:16, marginBottom:28 }}>
             <div style={{ height:1, width:60, background:'linear-gradient(to right,transparent,rgba(212,168,83,0.5))' }} />
             <Heart style={{ width:18, height:18, color:'#c4687a', fill:'#c4687a', animation:'heartbeat 1.5s ease infinite' }} />
             <div style={{ height:1, width:60, background:'linear-gradient(to left,transparent,rgba(212,168,83,0.5))' }} />
           </div>
-
           <p style={{ fontSize:'clamp(1rem,2.5vw,1.3rem)', fontWeight:300, lineHeight:1.7,
             color:'rgba(245,230,200,0.7)', maxWidth:560, margin:'0 auto' }}>
-            Has demostrado que cada momento que hemos vivido
-            vive también en ti. El universo ha respondido:
+            Has demostrado que cada momento que hemos vivido vive también en ti. El universo ha respondido:
             <strong style={{ color:'#f5e6c8', display:'block', marginTop:8 }}>Denver nos espera.</strong>
           </p>
         </div>
@@ -354,7 +375,7 @@ export default function RevealScreen() {
       <div style={{ maxWidth:960, margin:'0 auto', padding:'0 20px 80px', marginTop:-60 }}>
         <div style={{ display:'grid', gap:20, gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))' }}>
 
-          {/* ── Trip card ── */}
+          {/* ── Trip card (6 highlights) ── */}
           <div style={{
             gridColumn:'1 / -1',
             background:'linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))',
@@ -368,9 +389,7 @@ export default function RevealScreen() {
                 <p style={{ fontSize:10, fontFamily:'system-ui', fontWeight:700, letterSpacing:'0.3em',
                   textTransform:'uppercase', color:'#d4a853', marginBottom:8 }}>Tu Experiencia de Vida</p>
                 <h2 style={{ fontSize:'clamp(1.8rem,5vw,2.8rem)', fontWeight:900, lineHeight:1.1,
-                  color:'#f5e6c8', fontStyle:'italic' }}>
-                  Denver:<br/>Week Long Retreat
-                </h2>
+                  color:'#f5e6c8', fontStyle:'italic' }}>Denver:<br/>Week Long Retreat</h2>
               </div>
               <div style={{
                 background:'linear-gradient(135deg,#d4a853,#c4687a)',
@@ -382,6 +401,7 @@ export default function RevealScreen() {
                 <div style={{ fontSize:10, fontWeight:800, color:'#07000e', letterSpacing:'0.2em', opacity:0.7 }}>2026</div>
               </div>
             </div>
+            {/* 6-item highlights grid */}
             <div style={{
               display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',
               gap:20, borderTop:'1px solid rgba(212,168,83,0.1)', paddingTop:28,
@@ -555,8 +575,7 @@ export default function RevealScreen() {
             gridColumn:'1 / -1',
             borderRadius:28, overflow:'hidden', position:'relative',
             opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(40px)',
-            transition:'all 1s ease 0.85s',
-            boxShadow:'0 40px 100px rgba(0,0,0,0.5)',
+            transition:'all 1s ease 0.85s', boxShadow:'0 40px 100px rgba(0,0,0,0.5)',
           }}>
             <div style={{
               background:'linear-gradient(170deg,#0a1628 0%,#0d2240 25%,#1a3a5c 50%,#2d5a8e 70%,#3d7ab5 85%,#6ba3d6 100%)',
@@ -565,8 +584,7 @@ export default function RevealScreen() {
               {[...Array(18)].map((_,i) => (
                 <div key={i} style={{
                   position:'absolute', borderRadius:'50%',
-                  width:i%3===0?3:2, height:i%3===0?3:2,
-                  background:'white',
+                  width:i%3===0?3:2, height:i%3===0?3:2, background:'white',
                   top:`${5+(i*17)%45}%`, left:`${(i*13+7)%95}%`,
                   opacity:0.4+(i%4)*0.15,
                   animation:`heartbeat ${2+(i%3)}s ease ${i*0.3}s infinite`,
@@ -623,10 +641,10 @@ export default function RevealScreen() {
               borderTop:'1px solid rgba(147,197,253,0.15)',
             }}>
               {[
-                { emoji:'🏔️', label:'Altitud',       val:'2,926 m' },
+                { emoji:'🏔️', label:'Altitud',        val:'2,926 m' },
                 { emoji:'🎿', label:'Pistas de esquí', val:'187 km' },
-                { emoji:'🏨', label:'Alojamiento',    val:'One Ski Hill Place' },
-                { emoji:'🌙', label:'Noches',         val:'3 noches  ·  Abr 10–13' },
+                { emoji:'🏨', label:'Alojamiento',     val:'One Ski Hill Place' },
+                { emoji:'🌙', label:'Noches',          val:'3 noches  ·  Abr 10–13' },
               ].map((item,i) => (
                 <div key={i} style={{ display:'flex', alignItems:'center', gap:12 }}>
                   <span style={{ fontSize:24 }}>{item.emoji}</span>
@@ -641,17 +659,11 @@ export default function RevealScreen() {
             </div>
           </div>
 
-          {/* ══ Quantum card + Love note side by side ══ */}
-          <div style={{
-            gridColumn:'1 / -1',
-            display:'flex', gap:20, flexWrap:'wrap', alignItems:'stretch',
-          }}>
-            {/* Quantum card — 2/3 width */}
+          {/* ══ Quantum card + Love note ══ */}
+          <div style={{ gridColumn:'1 / -1', display:'flex', gap:20, flexWrap:'wrap', alignItems:'stretch' }}>
             <div style={{ flex:'2 1 380px' }}>
               <QuantumCard visible={visible} />
             </div>
-
-            {/* Love note — 1/3 width */}
             <div style={{
               flex:'1 1 260px',
               background:'linear-gradient(135deg,rgba(196,104,122,0.15),rgba(212,168,83,0.08))',
@@ -662,7 +674,6 @@ export default function RevealScreen() {
               transition:'all 1s ease 1.15s',
               display:'flex', flexDirection:'column', justifyContent:'space-between',
             }}>
-              {/* Watermark heart */}
               <Heart style={{
                 position:'absolute', bottom:-20, right:-20,
                 width:120, height:120, color:'rgba(212,168,83,0.06)', fill:'currentColor',
