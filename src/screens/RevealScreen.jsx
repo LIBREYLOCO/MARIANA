@@ -266,6 +266,160 @@ function QuantumCard({ visible }) {
   );
 }
 
+// ── Itinerary Drawer ──
+function ItineraryDrawer({ items }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      {/* Trigger button */}
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          gridColumn: '1 / -1',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          width: '100%', cursor: 'pointer',
+          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(212,168,83,0.18)',
+          borderRadius: 20, padding: '20px 28px',
+          transition: 'background 0.2s ease, border-color 0.2s ease',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,168,83,0.06)'; e.currentTarget.style.borderColor = 'rgba(212,168,83,0.35)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(212,168,83,0.18)'; }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+            background: 'rgba(212,168,83,0.1)', border: '1px solid rgba(212,168,83,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Calendar style={{ width: 18, height: 18, color: '#d4a853' }} />
+          </div>
+          <div style={{ textAlign: 'left' }}>
+            <p style={{ fontSize: 10, fontFamily: 'system-ui', fontWeight: 700,
+              letterSpacing: '0.3em', textTransform: 'uppercase', color: '#d4a853', marginBottom: 2 }}>
+              Abril 2026
+            </p>
+            <p style={{ fontSize: 17, fontWeight: 700, color: '#f5e6c8' }}>
+              Ver itinerario completo del viaje
+            </p>
+          </div>
+        </div>
+        <div style={{
+          width: 36, height: 36, borderRadius: '50%',
+          background: 'linear-gradient(135deg,#d4a853,#c4687a)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <span style={{ color: '#07000e', fontSize: 18, fontWeight: 900, lineHeight: 1 }}>→</span>
+        </div>
+      </button>
+
+      {/* Overlay */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(7,0,14,0.7)', backdropFilter: 'blur(6px)',
+            animation: 'fade-in 0.3s ease',
+          }}
+        />
+      )}
+
+      {/* Drawer panel */}
+      <div style={{
+        position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 101,
+        width: 'min(480px, 100vw)',
+        background: 'linear-gradient(180deg,#0d001f 0%,#07000e 100%)',
+        borderLeft: '1px solid rgba(212,168,83,0.2)',
+        boxShadow: '-40px 0 80px rgba(0,0,0,0.6)',
+        transform: open ? 'translateX(0)' : 'translateX(100%)',
+        transition: 'transform 0.45s cubic-bezier(0.16,1,0.3,1)',
+        display: 'flex', flexDirection: 'column',
+        overflowY: 'auto',
+      }}>
+        {/* Drawer header */}
+        <div style={{
+          padding: '28px 28px 20px',
+          borderBottom: '1px solid rgba(212,168,83,0.1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          position: 'sticky', top: 0,
+          background: 'linear-gradient(180deg,#0d001f 80%,transparent)',
+          zIndex: 2,
+        }}>
+          <div>
+            <p style={{ fontSize: 9, fontFamily: 'system-ui', fontWeight: 700,
+              letterSpacing: '0.35em', textTransform: 'uppercase', color: '#d4a853', marginBottom: 4 }}>
+              Itinerario
+            </p>
+            <h3 style={{ fontSize: 20, fontWeight: 900, fontStyle: 'italic', color: '#f5e6c8' }}>
+              Denver · Week Long Retreat
+            </h3>
+          </div>
+          <button
+            onClick={() => setOpen(false)}
+            style={{
+              width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(212,168,83,0.3)',
+              background: 'rgba(212,168,83,0.08)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#d4a853', fontSize: 18, fontWeight: 700, flexShrink: 0,
+            }}
+          >×</button>
+        </div>
+
+        {/* Timeline */}
+        <div style={{ padding: '24px 28px 40px', position: 'relative', flex: 1 }}>
+          <div style={{
+            position: 'absolute', left: 47, top: 24, bottom: 40, width: 1,
+            background: 'linear-gradient(to bottom,rgba(212,168,83,0.4),rgba(196,104,122,0.2),rgba(212,168,83,0.1))',
+          }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {items.map((item, i) => {
+              const Icon = item.icon;
+              const isLast = i === items.length - 1;
+              return (
+                <div key={i} style={{ display: 'flex', gap: 18, paddingBottom: isLast ? 0 : 22, position: 'relative' }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                    background: item.bg, border: `1.5px solid ${item.color}60`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    position: 'relative', zIndex: 2, boxShadow: `0 0 10px ${item.color}20`,
+                  }}>
+                    <Icon style={{ width: 15, height: 15, color: item.color }} />
+                  </div>
+                  <div style={{
+                    flex: 1, paddingTop: 7,
+                    borderBottom: isLast ? 'none' : '1px solid rgba(212,168,83,0.05)',
+                    paddingBottom: isLast ? 0 : 18,
+                  }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
+                      <span style={{
+                        fontSize: 9, fontFamily: 'system-ui', fontWeight: 700,
+                        letterSpacing: '0.2em', textTransform: 'uppercase',
+                        color: item.color, background: item.bg,
+                        padding: '2px 9px', borderRadius: 100, border: `1px solid ${item.color}30`,
+                      }}>{item.date}</span>
+                      {item.tag && (
+                        <span style={{
+                          fontSize: 8, fontFamily: 'system-ui', fontWeight: 800,
+                          letterSpacing: '0.2em', textTransform: 'uppercase', color: '#07000e',
+                          background: 'linear-gradient(135deg,#d4a853,#c4687a)',
+                          padding: '2px 9px', borderRadius: 100,
+                        }}>{item.tag}</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#f5e6c8', marginBottom: 2 }}>{item.label}</p>
+                    <p style={{ fontSize: 11, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.5)', marginBottom: 1, lineHeight: 1.5 }}>{item.detail}</p>
+                    <p style={{ fontSize: 10, fontFamily: 'system-ui', color: 'rgba(245,230,200,0.3)', lineHeight: 1.4 }}>{item.sub}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─────────────────────────────────────────
 
 const confirmations = [
@@ -427,79 +581,13 @@ export default function RevealScreen() {
             </div>
           </div>
 
-          {/* ── Itinerary ── */}
+          {/* ── Itinerary drawer trigger ── */}
           <div style={{
             gridColumn:'1 / -1',
-            background:'rgba(255,255,255,0.02)', border:'1px solid rgba(212,168,83,0.18)',
-            borderRadius:28, padding:'36px 32px',
             opacity:visible?1:0, transform:visible?'translateY(0)':'translateY(40px)',
             transition:'all 1s ease 0.45s',
           }}>
-            <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:32 }}>
-              <div style={{
-                width:44, height:44, borderRadius:12, flexShrink:0,
-                background:'rgba(212,168,83,0.1)', border:'1px solid rgba(212,168,83,0.25)',
-                display:'flex', alignItems:'center', justifyContent:'center',
-              }}>
-                <Calendar style={{ width:20, height:20, color:'#d4a853' }} />
-              </div>
-              <div>
-                <p style={{ fontSize:10, fontFamily:'system-ui', fontWeight:700,
-                  letterSpacing:'0.3em', textTransform:'uppercase', color:'#d4a853', marginBottom:2 }}>Abril 2026</p>
-                <h3 style={{ fontSize:22, fontWeight:900, fontStyle:'italic', color:'#f5e6c8', lineHeight:1 }}>
-                  Itinerario Completo del Viaje
-                </h3>
-              </div>
-            </div>
-            <div style={{ position:'relative' }}>
-              <div style={{
-                position:'absolute', left:19, top:8, bottom:8, width:1,
-                background:'linear-gradient(to bottom,rgba(212,168,83,0.4),rgba(196,104,122,0.2),rgba(212,168,83,0.1))',
-              }} />
-              <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
-                {itinerary.map((item,i) => {
-                  const Icon = item.icon;
-                  const isLast = i === itinerary.length-1;
-                  return (
-                    <div key={i} style={{ display:'flex', gap:20, paddingBottom:isLast?0:24, position:'relative' }}>
-                      <div style={{
-                        width:40, height:40, borderRadius:'50%', flexShrink:0,
-                        background:item.bg, border:`1.5px solid ${item.color}60`,
-                        display:'flex', alignItems:'center', justifyContent:'center',
-                        position:'relative', zIndex:2, boxShadow:`0 0 12px ${item.color}20`,
-                      }}>
-                        <Icon style={{ width:16, height:16, color:item.color }} />
-                      </div>
-                      <div style={{
-                        flex:1, paddingTop:8,
-                        borderBottom:isLast?'none':'1px solid rgba(212,168,83,0.06)',
-                        paddingBottom:isLast?0:20,
-                      }}>
-                        <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:4 }}>
-                          <span style={{
-                            fontSize:10, fontFamily:'system-ui', fontWeight:700,
-                            letterSpacing:'0.2em', textTransform:'uppercase',
-                            color:item.color, background:item.bg,
-                            padding:'3px 10px', borderRadius:100, border:`1px solid ${item.color}30`,
-                          }}>{item.date}</span>
-                          {item.tag && (
-                            <span style={{
-                              fontSize:9, fontFamily:'system-ui', fontWeight:800,
-                              letterSpacing:'0.2em', textTransform:'uppercase', color:'#07000e',
-                              background:'linear-gradient(135deg,#d4a853,#c4687a)',
-                              padding:'3px 10px', borderRadius:100,
-                            }}>{item.tag}</span>
-                          )}
-                        </div>
-                        <p style={{ fontSize:15, fontWeight:700, color:'#f5e6c8', marginBottom:3 }}>{item.label}</p>
-                        <p style={{ fontSize:12, fontFamily:'system-ui', color:'rgba(245,230,200,0.55)', marginBottom:2, lineHeight:1.5 }}>{item.detail}</p>
-                        <p style={{ fontSize:11, fontFamily:'system-ui', color:'rgba(245,230,200,0.35)', lineHeight:1.4 }}>{item.sub}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <ItineraryDrawer items={itinerary} />
           </div>
 
           {/* ── Confirmation list ── */}
@@ -595,28 +683,44 @@ export default function RevealScreen() {
                 background:'radial-gradient(ellipse at 30% 20%,rgba(110,231,183,0.12) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(147,197,253,0.10) 0%,transparent 55%)',
                 pointerEvents:'none',
               }} />
-              <div style={{ position:'relative', zIndex:2, marginBottom:32 }}>
-                <div style={{ display:'inline-flex', alignItems:'center', gap:8,
-                  padding:'6px 18px', borderRadius:100,
-                  background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.15)',
-                  marginBottom:20 }}>
-                  <span style={{ fontSize:9, fontFamily:'system-ui', fontWeight:800,
-                    letterSpacing:'0.35em', textTransform:'uppercase', color:'#93c5fd' }}>
-                    ✦  Post-Retiro · Aventura de Montaña  ✦
-                  </span>
+              <div style={{ position:'relative', zIndex:2, marginBottom:32,
+                display:'flex', flexWrap:'wrap', gap:32, alignItems:'flex-start' }}>
+                {/* Text side */}
+                <div style={{ flex:'1 1 280px' }}>
+                  <div style={{ display:'inline-flex', alignItems:'center', gap:8,
+                    padding:'6px 18px', borderRadius:100,
+                    background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.15)',
+                    marginBottom:20 }}>
+                    <span style={{ fontSize:9, fontFamily:'system-ui', fontWeight:800,
+                      letterSpacing:'0.35em', textTransform:'uppercase', color:'#93c5fd' }}>
+                      ✦  Post-Retiro · Aventura de Montaña  ✦
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize:'clamp(2rem,6vw,3.5rem)', fontWeight:900, fontStyle:'italic',
+                    color:'#ffffff', lineHeight:1, marginBottom:10, textShadow:'0 2px 20px rgba(0,0,0,0.4)' }}>
+                    Breckenridge,
+                  </h3>
+                  <h3 style={{ fontSize:'clamp(2rem,6vw,3.5rem)', fontWeight:900, fontStyle:'italic',
+                    color:'#ffffff', lineHeight:1, marginBottom:20, textShadow:'0 2px 20px rgba(0,0,0,0.4)' }}>
+                    Colorado
+                  </h3>
+                  <p style={{ fontSize:'clamp(0.9rem,2vw,1.05rem)', fontWeight:300, color:'rgba(255,255,255,0.65)', maxWidth:440, lineHeight:1.7 }}>
+                    Después de siete días transformando tu mente en el retiro, la montaña te espera
+                    para integrar, respirar y celebrar lo que eres ahora.
+                  </p>
                 </div>
-                <h3 style={{ fontSize:'clamp(2rem,6vw,3.5rem)', fontWeight:900, fontStyle:'italic',
-                  color:'#ffffff', lineHeight:1, marginBottom:10, textShadow:'0 2px 20px rgba(0,0,0,0.4)' }}>
-                  Breckenridge,
-                </h3>
-                <h3 style={{ fontSize:'clamp(2rem,6vw,3.5rem)', fontWeight:900, fontStyle:'italic',
-                  color:'#ffffff', lineHeight:1, marginBottom:20, textShadow:'0 2px 20px rgba(0,0,0,0.4)' }}>
-                  Colorado
-                </h3>
-                <p style={{ fontSize:'clamp(0.9rem,2vw,1.05rem)', fontWeight:300, color:'rgba(255,255,255,0.65)', maxWidth:480, lineHeight:1.7 }}>
-                  Después de siete días transformando tu mente en el retiro, la montaña te espera
-                  para integrar, respirar y celebrar lo que eres ahora.
-                </p>
+                {/* Hotel photo */}
+                <div style={{ flex:'1 1 260px', borderRadius:16, overflow:'hidden',
+                  boxShadow:'0 20px 60px rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.12)' }}>
+                  <img src="/one-ski-hill.webp" alt="One Ski Hill Place"
+                    style={{ width:'100%', height:220, objectFit:'cover', display:'block' }} />
+                  <div style={{ background:'rgba(10,22,40,0.9)', padding:'10px 16px' }}>
+                    <p style={{ fontSize:11, fontFamily:'system-ui', fontWeight:700, color:'#93c5fd',
+                      letterSpacing:'0.2em', textTransform:'uppercase' }}>One Ski Hill Place</p>
+                    <p style={{ fontSize:10, fontFamily:'system-ui', color:'rgba(255,255,255,0.4)',
+                      letterSpacing:'0.1em' }}>Breckenridge, Colorado · Abr 10–13</p>
+                  </div>
+                </div>
               </div>
               <svg viewBox="0 0 960 220" xmlns="http://www.w3.org/2000/svg"
                 style={{ display:'block', width:'100%', marginBottom:-2, position:'relative', zIndex:2 }}>
