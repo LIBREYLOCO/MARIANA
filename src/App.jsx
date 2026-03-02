@@ -4,10 +4,11 @@ import QuizScreen from './screens/QuizScreen';
 import CollapsingScreen from './screens/CollapsingScreen';
 import RevealScreen from './screens/RevealScreen';
 
-const UNLOCK_DATE = new Date('2026-03-05T00:00:00');
-const SECRET_CODE = 'LOCOPORTI';
+const UNLOCK_DATE   = new Date('2026-03-05T00:00:00');
+const SECRET_CODE   = 'LOCOPORTI';   // opens the portal (goes to intro)
+const BYPASS_CODE   = 'LIBREPORTI';  // skips quiz, jumps directly to reveal
 
-function LockedScreen({ onUnlock }) {
+function LockedScreen({ onUnlock, onBypass }) {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
   const [visible, setVisible] = useState(false);
   const [showInput, setShowInput] = useState(false);
@@ -39,7 +40,10 @@ function LockedScreen({ onUnlock }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (code.trim().toUpperCase() === SECRET_CODE) {
+    const entered = code.trim().toUpperCase();
+    if (entered === BYPASS_CODE) {
+      onBypass();
+    } else if (entered === SECRET_CODE) {
       onUnlock();
     } else {
       setShake(true);
@@ -272,7 +276,12 @@ export default function App() {
 
   // Date lock: only allow access on/after March 5, 2026 (unless secret code used)
   if (new Date() < UNLOCK_DATE && !secretUnlocked) {
-    return <LockedScreen onUnlock={() => setSecretUnlocked(true)} />;
+    return (
+      <LockedScreen
+        onUnlock={() => setSecretUnlocked(true)}
+        onBypass={() => { setSecretUnlocked(true); setStep('reveal'); }}
+      />
+    );
   }
 
   const handleQuizComplete = () => {
