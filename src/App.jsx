@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import IntroScreen from './screens/IntroScreen';
 import QuizScreen from './screens/QuizScreen';
 import CollapsingScreen from './screens/CollapsingScreen';
 import RevealScreen from './screens/RevealScreen';
 
 const UNLOCK_DATE = new Date('2026-03-05T00:00:00');
+const SECRET_CODE = 'LOCOPORTI';
 
-function LockedScreen() {
+function LockedScreen({ onUnlock }) {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
   const [visible, setVisible] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [code, setCode] = useState('');
+  const [shake, setShake] = useState(false);
+  const [wrongMsg, setWrongMsg] = useState(false);
+  const inputRef = useRef(null);
 
   function getTimeLeft() {
     const diff = UNLOCK_DATE - new Date();
@@ -25,6 +31,23 @@ function LockedScreen() {
     const id = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Focus input when it appears
+  useEffect(() => {
+    if (showInput) setTimeout(() => inputRef.current?.focus(), 50);
+  }, [showInput]);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (code.trim().toUpperCase() === SECRET_CODE) {
+      onUnlock();
+    } else {
+      setShake(true);
+      setWrongMsg(true);
+      setCode('');
+      setTimeout(() => { setShake(false); setWrongMsg(false); }, 1800);
+    }
+  }
 
   const unit = (val, label) => (
     <div style={{ textAlign: 'center', minWidth: 72 }}>
@@ -78,9 +101,100 @@ function LockedScreen() {
         transition: 'all 1.2s cubic-bezier(0.16,1,0.3,1)',
         textAlign: 'center', maxWidth: 560, position: 'relative', zIndex: 10,
       }}>
-        {/* Lock icon */}
-        <div style={{ fontSize: 52, marginBottom: 24, filter: 'drop-shadow(0 0 20px rgba(212,168,83,0.5))',
-          animation: 'heartbeat 3s ease infinite' }}>🔐</div>
+
+        {/* Lock icon — hover to reveal input */}
+        <div
+          title="¿Tienes el código secreto?"
+          onClick={() => setShowInput(v => !v)}
+          style={{
+            fontSize: 52, marginBottom: 24,
+            filter: showInput
+              ? 'drop-shadow(0 0 28px rgba(212,168,83,0.9))'
+              : 'drop-shadow(0 0 20px rgba(212,168,83,0.5))',
+            animation: 'heartbeat 3s ease infinite',
+            cursor: 'pointer',
+            transition: 'filter 0.3s ease, transform 0.3s ease',
+            display: 'inline-block',
+            userSelect: 'none',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = 'scale(1.2) rotate(-8deg)';
+            e.currentTarget.style.filter = 'drop-shadow(0 0 28px rgba(212,168,83,0.9))';
+            setShowInput(true);
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+            if (!code) {
+              e.currentTarget.style.filter = 'drop-shadow(0 0 20px rgba(212,168,83,0.5))';
+            }
+          }}
+        >
+          {showInput ? '🔓' : '🔐'}
+        </div>
+
+        {/* Secret code input — slides in */}
+        <div style={{
+          overflow: 'hidden',
+          maxHeight: showInput ? 140 : 0,
+          opacity: showInput ? 1 : 0,
+          transition: 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease',
+          marginBottom: showInput ? 20 : 0,
+        }}>
+          <form onSubmit={handleSubmit}>
+            <p style={{ fontSize: 11, fontFamily: 'system-ui', fontWeight: 700,
+              letterSpacing: '0.3em', textTransform: 'uppercase',
+              color: 'rgba(212,168,83,0.6)', marginBottom: 12 }}>
+              Código secreto
+            </p>
+            <div style={{
+              display: 'flex', gap: 8, justifyContent: 'center',
+              animation: shake ? 'shake 0.5s ease' : 'none',
+            }}>
+              <input
+                ref={inputRef}
+                type="text"
+                value={code}
+                onChange={e => setCode(e.target.value.toUpperCase())}
+                maxLength={12}
+                placeholder="••••••••••"
+                autoComplete="off"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: wrongMsg
+                    ? '1px solid rgba(196,104,122,0.8)'
+                    : '1px solid rgba(212,168,83,0.35)',
+                  borderRadius: 12,
+                  padding: '12px 20px',
+                  color: '#f5e6c8',
+                  fontSize: 18,
+                  fontWeight: 700,
+                  fontFamily: 'system-ui',
+                  letterSpacing: '0.25em',
+                  textAlign: 'center',
+                  width: 220,
+                  outline: 'none',
+                  transition: 'border-color 0.3s ease',
+                }}
+              />
+              <button type="submit" style={{
+                background: 'linear-gradient(135deg, #d4a853, #c4687a)',
+                border: 'none', borderRadius: 12,
+                padding: '12px 20px',
+                color: '#07000e', fontSize: 18, cursor: 'pointer',
+                fontWeight: 900, transition: 'opacity 0.2s ease',
+              }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              >→</button>
+            </div>
+            {wrongMsg && (
+              <p style={{ marginTop: 10, fontSize: 11, fontFamily: 'system-ui',
+                color: '#c4687a', letterSpacing: '0.2em', fontWeight: 700 }}>
+                Código incorrecto ✗
+              </p>
+            )}
+          </form>
+        </div>
 
         {/* Badge */}
         <div style={{
@@ -154,10 +268,11 @@ function LockedScreen() {
 
 export default function App() {
   const [step, setStep] = useState('intro');
+  const [secretUnlocked, setSecretUnlocked] = useState(false);
 
-  // Date lock: only allow access on/after March 5, 2026
-  if (new Date() < UNLOCK_DATE) {
-    return <LockedScreen />;
+  // Date lock: only allow access on/after March 5, 2026 (unless secret code used)
+  if (new Date() < UNLOCK_DATE && !secretUnlocked) {
+    return <LockedScreen onUnlock={() => setSecretUnlocked(true)} />;
   }
 
   const handleQuizComplete = () => {
