@@ -414,8 +414,11 @@ export default function RevealScreen() {
             }} />
             <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.1rem)', fontWeight: 300, lineHeight: 1.8,
               fontStyle: 'italic', color: 'rgba(245,230,200,0.85)', marginBottom: 24 }}>
-              "Este no es solo un regalo de cumpleaños — es una inversión en nuestro futuro compartido.
-              Gracias por ser mi compañera de viaje en esta dimensión y en todas las que faltan por descubrir."
+              "Este no es solo un regalo de cumpleaños —<br />es una inversión en nuestro futuro compartido.
+              <br /><br />
+              Gracias por ser mi compañera de viaje en esta{' '}
+              <strong style={{ color: '#f5e6c8', fontStyle: 'normal', fontWeight: 700 }}>HISTORIA DE VIDA</strong>{' '}
+              y en todas las que faltan por descubrir."
             </p>
             <div style={{ borderTop: '1px solid rgba(212,168,83,0.15)', paddingTop: 20 }}>
               <p style={{ fontSize: 22, fontWeight: 900, fontStyle: 'italic',
