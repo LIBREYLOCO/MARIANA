@@ -535,6 +535,58 @@ export default function TrampaScreen({ onBack }) {
                 <MatrixRain />
                 <CrackOverlay />
 
+                {/* ── Full-screen spinning orbit text ── */}
+                <div style={{
+                    position: 'fixed', inset: 0,
+                    zIndex: 48, pointerEvents: 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                    {/* Rotating text ring */}
+                    <div style={{
+                        position: 'absolute', inset: 0,
+                        animation: 'spin-circle 10s linear infinite',
+                    }}>
+                        <svg
+                            width="100%" height="100%"
+                            viewBox="0 0 1000 1000"
+                            preserveAspectRatio="xMidYMid meet"
+                            style={{ position: 'absolute', inset: 0 }}
+                        >
+                            <defs>
+                                <path
+                                    id="orbitPath"
+                                    d="M 500,500 m -430,0 a 430,430 0 1,1 860,0 a 430,430 0 1,1 -860,0"
+                                />
+                            </defs>
+                            <circle cx="500" cy="500" r="430"
+                                fill="none"
+                                stroke="rgba(255,0,60,0.08)"
+                                strokeWidth="1"
+                            />
+                            <text
+                                fill="rgba(255,0,60,0.7)"
+                                fontSize="28"
+                                fontFamily="monospace"
+                                fontWeight="900"
+                                letterSpacing="8"
+                            >
+                                <textPath href="#orbitPath">
+                                    ¿PENSASTE QUE SERÍA TAN FÁCIL?  ★  ¿PENSASTE QUE SERÍA TAN FÁCIL?  ★  ¿PENSASTE QUE SERÍA TAN FÁCIL?  ★
+                                </textPath>
+                            </text>
+                        </svg>
+                    </div>
+                    {/* Counter-rotating 😈 at center */}
+                    <div style={{
+                        fontSize: 48,
+                        animation: 'spin-circle 10s linear infinite reverse',
+                        position: 'relative', zIndex: 2,
+                        filter: 'drop-shadow(0 0 20px rgba(255,0,60,0.6))',
+                    }}>
+                        😈
+                    </div>
+                </div>
+
                 {/* Sporadic horizontal glitch bars */}
                 {Array.from({ length: 12 }, (_, i) => (
                     <div key={i} style={{
@@ -658,46 +710,6 @@ export default function TrampaScreen({ onBack }) {
                             ))}
                         </div>
 
-                        {/* Spinning circle badge */}
-                        <div style={{
-                            display: 'flex', justifyContent: 'center',
-                            marginTop: 24, marginBottom: 4,
-                        }}>
-                            <div style={{
-                                position: 'relative', width: 140, height: 140,
-                                animation: 'spin-circle 6s linear infinite',
-                            }}>
-                                <svg viewBox="0 0 140 140" width="140" height="140">
-                                    <defs>
-                                        <path
-                                            id="circlePath"
-                                            d="M 70,70 m -52,0 a 52,52 0 1,1 104,0 a 52,52 0 1,1 -104,0"
-                                        />
-                                    </defs>
-                                    {/* Faint circle guide */}
-                                    <circle cx="70" cy="70" r="52"
-                                        fill="none"
-                                        stroke="rgba(255,0,60,0.18)"
-                                        strokeWidth="1"
-                                    />
-                                    {/* Spinning text */}
-                                    <text fill="rgba(255,0,60,0.85)" style={{ fontSize: 10.5, fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.18em' }}>
-                                        <textPath href="#circlePath">
-                                            ¿PENSASTE QUE SERÍA TAN FÁCIL? ★ ¿PENSASTE QUE SERÍA TAN FÁCIL? ★
-                                        </textPath>
-                                    </text>
-                                </svg>
-                                {/* Center element */}
-                                <div style={{
-                                    position: 'absolute', top: '50%', left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    fontSize: 28,
-                                    animation: 'spin-circle 6s linear infinite reverse',
-                                }}>
-                                    😈
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Footer system text */}
                         <div style={{
