@@ -3,11 +3,13 @@ import IntroScreen from './screens/IntroScreen';
 import QuizScreen from './screens/QuizScreen';
 import CollapsingScreen from './screens/CollapsingScreen';
 import RevealScreen from './screens/RevealScreen';
+import TrampaScreen from './screens/TrampaScreen';
 
 const UNLOCK_DATE = new Date('2026-03-05T00:00:00');
 const SECRET_CODE = 'LOCOPORTI';    // early access → intro
 const BYPASS_CODE = 'LIBREPORTI';  // bypass → reveal
-const LOVU_CODE = 'LOVU INFINITO'; // public code after countdown → intro
+const LOVU_CODE = 'LOVU INFINITO'; // real code sent via flowers → intro
+const NENA_CODE = 'NENA TE AMO';   // decoy shown on screen → trampa
 
 const WRONG_MSGS = [
   'Amor, ese no es... pero sé que lo sabes 💛',
@@ -22,7 +24,7 @@ const WRONG_MSGS = [
   'Bebé, el código existe — y cuando lo encuentres, vas a entender todo ✦',
 ];
 
-function LockedScreen({ onUnlock, onBypass, onLovu }) {
+function LockedScreen({ onUnlock, onBypass, onLovu, onTrampa }) {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft());
   const [visible, setVisible] = useState(false);
   const [showInput, setShowInput] = useState(false);
@@ -65,6 +67,8 @@ function LockedScreen({ onUnlock, onBypass, onLovu }) {
       onBypass();
     } else if (entered === LOVU_CODE) {
       onLovu();
+    } else if (entered === NENA_CODE) {
+      onTrampa();
     } else if (entered === SECRET_CODE) {
       onUnlock();
     } else {
@@ -333,7 +337,7 @@ function LockedScreen({ onUnlock, onBypass, onLovu }) {
               letterSpacing: '0.08em', lineHeight: 1.2, marginBottom: 14,
               filter: 'drop-shadow(0 0 20px rgba(212,168,83,0.5))',
             }}>
-              LOVU INFINITO
+              NENA TE AMO
             </div>
             <p style={{
               fontSize: 11, fontFamily: 'system-ui',
@@ -358,16 +362,17 @@ function LockedScreen({ onUnlock, onBypass, onLovu }) {
 }
 
 export default function App() {
-  const [step, setStep] = useState('intro');
+  const [step, setStep] = useState('locked');
   const [unlocked, setUnlocked] = useState(false);
 
-  // Always show LockedScreen until a code is entered
+  // Always show LockedScreen until a real code is entered
   if (!unlocked) {
     return (
       <LockedScreen
         onUnlock={() => { setUnlocked(true); setStep('intro'); }}
         onBypass={() => { setUnlocked(true); setStep('reveal'); }}
         onLovu={() => { setUnlocked(true); setStep('intro'); }}
+        onTrampa={() => { setUnlocked(true); setStep('trampa'); }}
       />
     );
   }
@@ -376,6 +381,15 @@ export default function App() {
     setStep('collapsing');
     setTimeout(() => setStep('reveal'), 4000);
   };
+
+  // Trampa — back button resets everything to locked screen
+  if (step === 'trampa') {
+    return (
+      <TrampaScreen
+        onBack={() => { setUnlocked(false); setStep('locked'); }}
+      />
+    );
+  }
 
   if (step === 'intro') return <IntroScreen onStart={() => setStep('quiz')} />;
   if (step === 'quiz') return <QuizScreen onComplete={handleQuizComplete} />;
